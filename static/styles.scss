@@ -1,0 +1,61 @@
+$base-color: oklch(24% 0.023 329.708);
+$primary-color: oklch(71.996% 0.123 62.756);
+$accent-color: oklch(42.621% 0.074 224.389);
+$info-color: oklch(79.49% 0.063 184.558);
+$warning-color: oklch(88.15% 0.14 87.722);
+$secondary-color: oklch(34.465% 0.029 199.194);
+$neutral-color: oklch(16.51% 0.015 326.261);
+$success-color: oklch(74.722% 0.072 131.116);
+$error-color: oklch(77.318% 0.128 31.871);
+
+//@import "../node_modules/bootstrap/scss/bootstrap";
+
+body{
+    background-color: $neutral-color;
+    color: $primary-color;
+    margin: 0;
+    padding: 0;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    overflow: hidden;
+}
+
+.max-height{
+   height: 100vh;
+}
+
+.sidebar-custom {
+    background-color: $primary-color;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+
+    &, a, .nav-link, .fs-5 {
+        color: $accent-color;
+    }
+
+    .nav-pills .nav-link.active {
+        background-color: $accent-color;
+    }
+
+    .nav-link {
+        &:hover {
+            color: $info-color;
+        }
+    }
+
+    #main-logo{
+        font-family: "Leckerli One", cursive !important;
+        font-weight: 400;
+        font-size: larger;
+    }
+}
+
+.mute-color{
+    font-style: italic;
+    color: oklch(84.285% 0.08068 64.508) !important;   
+}
+
+.gen-btn-color{
+    background-color: $primary-color !important;
+    color: $neutral-color !important;
+    border: none !important;
+}

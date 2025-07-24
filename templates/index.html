@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<div class="container-fluid overflow-hidden">
+    <div class="row flex-nowrap">
+        <div id="sb" class="col-auto col-md-2 col-xl-1 px-sm-2 px-0 sidebar-custom" >
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 min-vh-100">
+                <a href="/" id="main-logo" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-decoration-none fs-leckerli-one">
+                    <span class="fs-5 d-none d-sm-inline">QuizifAI</span>
+                </a>
+                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link align-middle px-0">
+                            <i class="bi bi-house-door"></i>
+                            <span class="ms-1 d-none d-sm-inline">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-link px-0 align-middle">
+                            <i class="bi bi-pencil-square"></i>
+                            <span class="ms-1 d-none d-sm-inline">Quizzes</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-link px-0 align-middle">
+                            <i class="bi bi-graph-up-arrow"></i>
+                            <span class="ms-1 d-none d-sm-inline">Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="nav-link px-0 align-middle">
+                            <i class="bi bi-gear"></i>
+                            <span class="ms-1 d-none d-sm-inline">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col align-items-center text-center p-5">
+            <h1>
+                Welcome to QuizifAI!, 
+                <br>
+                your AI-powered quiz platform.
+                <br>
+                <small class="mute-color">Your journey to smarter quizzes starts here.</small>
+                <br>
+            </h1>
+            <form method="POST">
+                <div class="d-flex justify-content-center align-items-center p-5 mb-5">
+                    <input 
+                        name="study_material" 
+                        class="form-control me-2" 
+                        type="text" 
+                        placeholder="Enter study material..." 
+                        aria-label="Search"
+                    >
+                    <button 
+                        class="btn btn-primary gen-btn-color" 
+                        type="submit"
+                    >
+                        Generate
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
