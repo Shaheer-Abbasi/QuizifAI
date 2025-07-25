@@ -47,8 +47,9 @@
                 <small class="mute-color">Your journey to smarter quizzes starts here.</small>
                 <br>
             </h1>
-            <form method="POST">
-                <div class="d-flex justify-content-center align-items-center p-5 mb-5">
+            
+            <div class="d-flex justify-content-center align-items-center p-5 mt-5 col-auto ">
+                <form method="POST" class="d-flex flex-column align-items-center study-form-custom">
                     <input 
                         name="study_material" 
                         class="form-control me-2" 
@@ -57,13 +58,22 @@
                         aria-label="Search"
                     >
                     <button 
-                        class="btn btn-primary gen-btn-color" 
+                        class="btn btn-primary gen-btn-color mt-3" 
                         type="submit"
                     >
                         Generate
                     </button>
-                </div>
-            </form>
+                    <button
+                        class="btn btn-secondary upload-btn-color mt-3" 
+                        type="reset">
+                        Upload
+                    </button>
+                </form>
+            </div>
+
+            <div class="d-flex flex-column w-100 p-5 mt-3 rounded q-bank-color">
+                
+            </div>
         </div>
     </div>
 </div>

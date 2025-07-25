@@ -40,4 +40,19 @@ body {
   background-color: oklch(71.996% 0.123 62.756deg) !important;
   color: oklch(16.51% 0.015 326.261deg) !important;
   border: none !important;
+}
+
+.upload-btn-color {
+  background-color: oklch(79.49% 0.063 184.558deg) !important;
+  color: oklch(16.51% 0.015 326.261deg) !important;
+  border: none !important;
+}
+
+.study-form-custom {
+  width: 400px;
+}
+
+.q-bank-color {
+  background-color: oklch(24% 0.023 329.708deg) !important;
+  height: 50%;
 }/*# sourceMappingURL=styles.css.map */
