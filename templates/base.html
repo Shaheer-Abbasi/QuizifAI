@@ -27,4 +27,27 @@
         integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" 
         crossorigin="anonymous">
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var $studyForm = $("#study-form");
+            if ($studyForm.length) {
+                $studyForm.submit(function(e) {
+                    e.preventDefault();
+                    $.ajax({
+                        type: 'POST',
+                        url: "/",
+                        data: $(this).serialize(),
+                        dataType: 'json',
+                        success: function(response) {
+                            console.log("Server recieved: ", response);
+                        },
+                        error: function(xhr) {
+                            console.error("Error occurred: ", xhr.responseText);
+                        }
+                    });
+                });
+            }
+        });
+    </script>
 </html>
