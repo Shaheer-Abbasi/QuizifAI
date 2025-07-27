@@ -21,7 +21,7 @@ app = Flask(__name__)
 #            "content": "Give me 5 facts about the following. Format your answer in a python string array. " + user_input if user_input else "say 'No input provided'"
 #            }
 #        ]
-#        )
+#)
 
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY"),
@@ -40,7 +40,11 @@ def index():
 
         response = client.models.generate_content(
             model="gemma-3n-e2b-it",
-            contents="Give me 1 fact about the following. Format your answer in a python string array: " + user_input if user_input else "say 'No input provided'",
+            contents="Give me 1 question about the following topic and 4 answer choices. " \
+                     "Format your response by providing only the question and answers seperated by commas. " \
+                     "Make sure to include the correct answer in the choices marked with an asterisk. " \
+                     "Also make sure to have A. , B. , C. , D. ." \
+                     + user_input if user_input else "say 'No input provided'",
         )
         
         logging.basicConfig(level=logging.INFO)
@@ -50,7 +54,7 @@ def index():
         logging.info(f"AI response: {ai_response}")
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return jsonify({"status": "success", "input" : user_input}, {"ai_response": ai_response})
+            return jsonify({"status": "success", "input" : user_input}, {"status": "success", "ai_response": ai_response})
         else:
             return render_template("index.html")
    

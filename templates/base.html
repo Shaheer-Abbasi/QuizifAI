@@ -31,6 +31,7 @@
     <script>
         $(document).ready(function() {
             var $studyForm = $("#study-form");
+            var $quizBank = $("#quiz-bank");
             if ($studyForm.length) {
                 $studyForm.submit(function(e) {
                     e.preventDefault();
@@ -41,6 +42,15 @@
                         dataType: 'json',
                         success: function(response) {
                             console.log("Server recieved: ", response);
+                            $studyForm.val('');
+                            $quizBank.empty();
+                            ai_response = response[1].ai_response || "No response from AI";
+                            console.log("AI response: ", ai_response);
+                            $quizBank.append(
+                                '<div class="d-flex flex-column w-25 h-100 p-5 rounded bg-dark">' +
+                                    '<p>'+ ai_response +'</p>' +
+                                '</div>'
+                            );
                         },
                         error: function(xhr) {
                             console.error("Error occurred: ", xhr.responseText);
