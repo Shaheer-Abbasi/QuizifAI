@@ -31,6 +31,7 @@
     <script>
         $(document).ready(function() {
             var $studyForm = $("#study-form");
+            var $quizBank = $("#quiz-bank");
             if ($studyForm.length) {
                 $studyForm.submit(function(e) {
                     e.preventDefault();
@@ -41,6 +42,42 @@
                         dataType: 'json',
                         success: function(response) {
                             console.log("Server recieved: ", response);
+                            $studyForm.val('');
+                            $quizBank.empty();
+                            ai_response = response[1].ai_response || "No response from AI";
+                            console.log("AI response: ", ai_response);
+                            ai_response_array = ai_response.split('|');
+                            console.log("AI response array: ", ai_response_array);
+                            /*
+                                question = question.replace(/A\. /, '<strong>A.</strong> ')
+                                                    .replace(/B\. /, '<strong>B.</strong> ')
+                                                    .replace(/C\. /, '<strong>C.</strong> ')
+                                                    .replace(/D\. /, '<strong>D.</strong> ')
+
+                                                    '<span>' + answer.replace('*', '') + '</span>' +
+                            */
+                            $quizBank.append('<div class="d-flex w-100 gap-4" style="overflow: hidden; max-width: 400px; overflow-x: auto;"></div>');
+                            const $container = $quizBank.children().last();
+                            ai_response_array.forEach(question => {
+                                if(question.trim()) {
+                                    const questionText = question.split(';')[0].trim();
+                                    const answers = question.split(';')[1].split(',').map(a => a.trim());
+                        
+                                    $container.append(
+                                        '<div class="d-flex flex-column w-25 h-100 p-5 rounded m-2" style="background-color: oklch(16% 0.019 329.708); min-width: 350px; max-width: 350px; flex-shrink: 0; overflow: hidden;">' +
+                                            '<div class="card-body">' +
+                                                '<h5 class="card-title">' + questionText + '</h5>' +
+                                                '<div class="d-flex flex-column gap-2">' +
+                                                    answers.map((answer, index) => 
+                                                        '<div class="d-flex align-items-center gap-2">' +
+                                                            '<span class="badge rounded-cricle" style="background-color: oklch(34.465% 0.029 199.194);">' + String.fromCharCode(65 + index) + '.</span>' +
+                                                            '<span class="text-wrap">' + answer + '</span>' +
+                                                '</div>' + '').join('') + 
+                                            '</div>' +
+                                        '</div>'
+                                    );
+                                }
+                            });
                         },
                         error: function(xhr) {
                             console.error("Error occurred: ", xhr.responseText);

@@ -71,6 +71,16 @@ body{
 }
 
 .q-bank-color{
-    background-color: $base-color !important;
+    background-color: $base-color;
     height: 50%;
+    overflow: hidden !important;
+    overflow-x: auto !important;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    width: 400px !important;
+}
+
+.card-custom{
+    background-color: $accent-color !important;
+    color: $primary-color !important;
 }
