@@ -48,33 +48,32 @@
                 <br>
             </h1>
             
-            <div class="d-flex justify-content-center align-items-center p-5 mt-5 col-auto ">
-                <form id="study-form" method="POST" class="d-flex flex-column align-items-center study-form-custom">
+            <div class="d-flex justify-content-center align-items-center p-5 mt-5 col-12 col-md-auto">
+                <form id="study-form" method="POST" class="d-flex flex-column align-items-center study-form-custom w-100" style="max-width:400px;">
                     <input 
                         name="study_material" 
                         id="study-input"
-                        class="form-control me-2" 
+                        class="form-control me-2 mb-2" 
                         type="text" 
                         placeholder="Enter study material..." 
                         aria-label="Search"
                     >
                     <button 
-                        class="btn btn-primary gen-btn-color mt-3" 
+                        class="btn btn-primary gen-btn-color mt-2 w-50" 
                         type="submit"
                     >
                         Generate
                     </button>
                     <button
-                        class="btn btn-secondary upload-btn-color mt-3" 
+                        class="btn btn-secondary upload-btn-color mt-2 w-50" 
                         type="reset">
                         Upload
                     </button>
                 </form>
             </div>
 
-            <div id="quiz-bank" class="d-flex flex-column w-100 p-5 mt-3 rounded q-bank-color">
-                <h2 class="text-center">Quiz Bank</h2>
-                <p class="text-center">Your generated quizzes will appear here.</p>
+            <div id="quiz-bank" class="d-inline-block w-100 gap-4 p-5 mt-3 rounded q-bank-color">
+                <h2 class="text-center">Question Bank</h2>
             </div>
         </div>
     </div>

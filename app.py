@@ -40,10 +40,11 @@ def index():
 
         response = client.models.generate_content(
             model="gemma-3n-e2b-it",
-            contents="Give me 1 question about the following topic and 4 answer choices. " \
-                     "Format your response by providing only the question and answers seperated by commas. " \
+            contents="Give me 7 questions about the following topic and 4 answer choices per question. " \
+                     "Format your response by providing only the question (with a ; after the question mark) followed by its answers seperated by commas. " \
+                     "Seperate each question by a | symbol." \
                      "Make sure to include the correct answer in the choices marked with an asterisk. " \
-                     "Also make sure to have A. , B. , C. , D. ." \
+                     "Do NOT label the answers with A. B. C., etc" \
                      + user_input if user_input else "say 'No input provided'",
         )
         
