@@ -35,27 +35,24 @@
             if ($studyForm.length) {
                 $studyForm.submit(function(e) {
                     e.preventDefault();
+                    var formData = new FormData(this);
                     $.ajax({
                         type: 'POST',
                         url: "/",
-                        data: $(this).serialize(),
+                        data: formData,
                         dataType: 'json',
+                        processData: false,
+                        contentType: false,
                         success: function(response) {
                             console.log("Server recieved: ", response);
-                            $studyForm.val('');
+                            $studyForm[0].reset();
                             $quizBank.empty();
+
                             ai_response = response[1].ai_response || "No response from AI";
                             console.log("AI response: ", ai_response);
                             ai_response_array = ai_response.split('|');
                             console.log("AI response array: ", ai_response_array);
-                            /*
-                                question = question.replace(/A\. /, '<strong>A.</strong> ')
-                                                    .replace(/B\. /, '<strong>B.</strong> ')
-                                                    .replace(/C\. /, '<strong>C.</strong> ')
-                                                    .replace(/D\. /, '<strong>D.</strong> ')
-
-                                                    '<span>' + answer.replace('*', '') + '</span>' +
-                            */
+                            
                             $quizBank.append('<div class="d-flex w-100 gap-4" style="overflow: hidden; max-width: 400px; overflow-x: auto;"></div>');
                             const $container = $quizBank.children().last();
                             ai_response_array.forEach(question => {
