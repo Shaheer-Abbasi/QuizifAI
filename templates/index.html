@@ -47,9 +47,19 @@
                 <small class="mute-color">Your journey to smarter quizzes starts here.</small>
                 <br>
             </h1>
-            
+
             <div class="d-flex justify-content-center align-items-center p-5 mt-5 col-12 col-md-auto">
-                <form id="study-form" method="POST" class="d-flex flex-column align-items-center study-form-custom w-100" style="max-width:400px;">
+                <form
+                    id="study-form"
+                    method="POST"
+                    class="d-flex flex-column align-items-center study-form-custom w-100"
+                    style="max-width:400px;"
+                    enctype="multipart/form-data"
+                >
+                    <div class="input-section d-flex flex-column align-items-center">
+                        <input type="file" name="file" accept=".pdf,.png,.jpg,.jpeg">
+                        <p>Supports PDFs or images (PNG/JPG).</p>
+                    </div>
                     <input 
                         name="study_material" 
                         id="study-input"
@@ -59,15 +69,10 @@
                         aria-label="Search"
                     >
                     <button 
-                        class="btn btn-primary gen-btn-color mt-2 w-50" 
+                        class="btn btn-primary gen-btn-color gen-btn-color:hover mt-2 w-50" 
                         type="submit"
                     >
                         Generate
-                    </button>
-                    <button
-                        class="btn btn-secondary upload-btn-color mt-2 w-50" 
-                        type="reset">
-                        Upload
                     </button>
                 </form>
             </div>

@@ -60,6 +60,11 @@ body{
     border: none !important;
 }
 
+.gen-btn-color:hover{
+    background-color: $accent-color !important;
+    color: $primary-color !important;
+}
+
 .upload-btn-color{
     background-color: $info-color !important;
     color: $neutral-color !important;
