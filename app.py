@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from pypdf import PdfReader
 from PIL import Image
 import pytesseract
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -45,35 +46,43 @@ def extract_text_from_image(image_path):
     except Exception as e:
         logging.error(f"Error extracting text from image: {e}")
         return None
-    
+
 
 @app.route("/", methods=["POST", "GET"])
+@app.route("/upload", methods=["POST", "GET"])
 def index():
     ai_response = None
     user_input = None
      
     if request.method == "POST":
+        app.logger.info(f"Request files: {request.files}")
+        app.logger.info(f"Request form: {request.form}")
+        app.logger.info(f"File in request.files: {'file' in request.files}")
         if 'file' in request.files:
+            app.logger.info("File upload detected")
             file = request.files['file']
             if file.filename != '':
-                logging.info(f"File received: {file.filename}")
+                app.logger.info(f"File received: {file.filename}")
                 file_ext = file.filename.split('.')[1].lower()
 
                 if file_ext == 'pdf':
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                     file.save(file_path)
                     user_input = extract_text_from_pdf(file_path)
                     print(f"Extracted text from PDF: {user_input}")
                 elif file_ext in ['png', 'jpg', 'jpeg']:
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                     file.save(file_path)
                     user_input = extract_text_from_image(file_path)
                     print(f"Extracted text from image: {user_input}")
                 else:
                     return jsonify({"status": "error", "message": "Unsupported file type"}), 400
-        else:
+        elif 'file' not in request.files:
+            app.logger.info("No file upload detected, checking for user input")
             user_input = request.form.get("study_material")
-            logging.info(f"User entered: {user_input}")
+            app.logger.info(f"User entered: {user_input}")
 
         response = client.models.generate_content(
             model="gemma-3n-e2b-it",
