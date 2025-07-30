@@ -82,7 +82,15 @@ body{
     overflow-x: auto !important;
     white-space: nowrap;
     flex-wrap: nowrap;
-    width: 400px !important;
+    width: 100% !important;
+}
+
+.quiz-card-custom{
+    background-color: oklch(16% 0.019 329.708) !important; 
+    min-width: 350px !important; 
+    max-width: 350px !important; 
+    flex-shrink: 0 !important; 
+    overflow: hidden !important; 
 }
 
 .card-custom{

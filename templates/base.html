@@ -52,8 +52,8 @@
                             console.log("AI response: ", ai_response);
                             ai_response_array = ai_response.split('|');
                             console.log("AI response array: ", ai_response_array);
-                            
-                            $quizBank.append('<div class="d-flex w-100 gap-4" style="overflow: hidden; max-width: 400px; overflow-x: auto;"></div>');
+
+                            $quizBank.append('<div class="d-flex w-100 gap-4" style="overflow: hidden; max-width: calc(100% - 2rem); min-height: 100%; max-height: 100%; overflow-x: auto;"></div>');
                             const $container = $quizBank.children().last();
                             ai_response_array.forEach(question => {
                                 if(question.trim()) {
@@ -61,7 +61,7 @@
                                     const answers = question.split(';')[1].split(',').map(a => a.trim());
                         
                                     $container.append(
-                                        '<div class="d-flex flex-column w-25 h-100 p-5 rounded m-2" style="background-color: oklch(16% 0.019 329.708); min-width: 350px; max-width: 350px; flex-shrink: 0; overflow: hidden;">' +
+                                        '<div class="d-flex flex-column w-25 h-100 p-5 rounded m-2" style="background-color: oklch(16% 0.019 329.708); min-width: 350px; max-width: 350px; min-height: calc(100% - 2rem); max-height: calc(100% - 2rem); flex-shrink: 0; overflow: hidden;">' +
                                             '<div class="card-body">' +
                                                 '<h5 class="card-title">' + questionText + '</h5>' +
                                                 '<div class="d-flex flex-column gap-2">' +

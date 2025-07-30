@@ -9,13 +9,21 @@ from pypdf import PdfReader
 from PIL import Image
 import pytesseract
 from werkzeug.utils import secure_filename
+from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quiz.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+with app.app_context():
+    db.create_all()
 
 client = genai.Client(
     api_key=os.getenv("GEMINI_API_KEY"),
 )
-
+    
 load_dotenv()
 
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
@@ -79,18 +87,20 @@ def index():
                     print(f"Extracted text from image: {user_input}")
                 else:
                     return jsonify({"status": "error", "message": "Unsupported file type"}), 400
-        elif 'file' not in request.files:
+        else:
             app.logger.info("No file upload detected, checking for user input")
             user_input = request.form.get("study_material")
             app.logger.info(f"User entered: {user_input}")
 
         response = client.models.generate_content(
             model="gemma-3n-e2b-it",
-            contents="Give me a few questions about the following topic and 4 answer choices per question. " \
+            contents="Give me a few questions about the following study material with 4 answer choices per question. " \
                      "Format your response by providing only the question (with a ; after the question mark) followed by its answers seperated by commas. " \
-                     "Seperate each question by a | symbol." \
+                     "Please separate each question with a | symbol." \
                      "Make sure to include the correct answer in the choices marked with an asterisk. " \
                      "Do NOT label the answers with A. B. C., etc:" \
+                     "For example: question1? answer1, answer2, answer3, answer4* | question2? answer1, answer2*, answer3, answer4" \
+                     "Here is the study material: " \
                      + user_input if user_input else "say 'No input provided'",
         )
         
