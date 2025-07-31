@@ -1,10 +1,5 @@
 # QuizifAI: AI-Powered Quiz Generator
 
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Flask-2.0-lightgrey)](https://flask.palletsprojects.com/)
-[![HuggingFace](https://img.shields.io/badge/HuggingFace-Transformers-yellow)](https://huggingface.co/)
-[![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/licenses/MIT)
-
 **QuizifAI** automatically generates quizzes from textbooks, notes, or images! Upload a PDF/image or paste text, and let AI create practice questions. Perfect for students and educators.
 
 **Key Features**:
