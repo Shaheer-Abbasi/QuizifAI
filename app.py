@@ -1,7 +1,5 @@
 import os
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-import requests
-from openai import OpenAI
 from google import genai
 import logging
 from dotenv import load_dotenv
@@ -10,6 +8,10 @@ from PIL import Image
 import pytesseract
 from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin
+from flask_wtf import wtforms
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import InputRequired, Length, ValidationError
 
 app = Flask(__name__)
 
