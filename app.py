@@ -9,7 +9,7 @@ import pytesseract
 from werkzeug.utils import secure_filename
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin
-from flask_wtf import wtforms
+from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 
@@ -96,14 +96,23 @@ def index():
 
         response = client.models.generate_content(
             model="gemma-3n-e2b-it",
-            contents="Give me a few questions about the following study material with 4 answer choices per question. " \
-                     "Format your response by providing only the question (with a ; after the question mark) followed by its answers seperated by commas. " \
-                     "Please separate each question with a | symbol." \
-                     "Make sure to include the correct answer in the choices marked with an asterisk. " \
-                     "Do NOT label the answers with A. B. C., etc:" \
-                     "For example: question1? answer1, answer2, answer3, answer4* | question2? answer1, answer2*, answer3, answer4" \
-                     "Here is the study material: " \
-                     + user_input if user_input else "say 'No input provided'",
+            contents="""Create quiz questions from the study material below. Follow these EXACT formatting rules:
+
+            RULES:
+            1. Generate 3-5 multiple choice questions
+            2. Each question must have EXACTLY 4 answer choices
+            3. Mark the correct answer with an asterisk (*) at the END
+            4. Use this EXACT format: Question? ; answer1, answer2, answer3*, answer4
+            5. Separate questions with the pipe symbol: |
+            6. NO letter labels (A, B, C, D)
+            7. NO numbering
+            8. NO extra text or explanations
+
+            EXAMPLE FORMAT:
+            What is the capital of France? ; London, Berlin, Paris*, Rome | What is 2+2? ; 3, 4*, 5, 6
+
+            STUDY MATERIAL:
+            """ + (user_input if user_input else "No input provided"),
         )
         
         logging.basicConfig(level=logging.INFO)

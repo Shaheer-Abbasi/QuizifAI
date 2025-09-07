@@ -2,8 +2,8 @@
 
 {% block body %}
 
-<div class="container-fluid overflow-hidden">
-    <div class="row flex-nowrap">
+<div class="container-fluid">
+    <div class="row">
         <div id="sb" class="col-auto col-md-2 col-xl-1 px-sm-2 px-0 sidebar-custom" >
             <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 min-vh-100">
                 <a href="/" id="main-logo" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-decoration-none fs-leckerli-one">
@@ -38,48 +38,170 @@
             </div>
         </div>
 
-        <div class="col align-items-center text-center p-5">
-            <h1>
-                Welcome to QuizifAI, 
-                <br>
-                your AI-powered quiz platform.
-                <br>
-                <small class="mute-color">Your journey to smarter quizzes starts here.</small>
-                <br>
-            </h1>
+        <div class="col p-3 p-md-5" x-data="{ showWelcome: true }">
+            <!-- Welcome Section - Hidden when quiz is loaded -->
+            <div x-show="showWelcome" x-transition class="welcome-section text-center">
+                <h1 class="welcome-title">
+                    Welcome to QuizifAI, 
+                    <br>
+                    your AI-powered quiz platform.
+                    <br>
+                    <small class="mute-color">Your journey to smarter quizzes starts here.</small>
+                    <br>
+                </h1>
 
-            <div class="d-flex justify-content-center align-items-center p-5 mt-5 col-12 col-md-auto">
-                <form
-                    id="study-form"
-                    method="POST"
-                    class="d-flex flex-column align-items-center study-form-custom w-100"
-                    style="max-width:400px;"
-                    enctype="multipart/form-data"
-                >
-                    <div class="input-section d-flex flex-column align-items-center">
-                        <input type="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.heic">
-                        <p>Supports PDFs or images (PNG/JPG).</p>
+                <div class="d-flex justify-content-center align-items-center mt-4 mt-md-5">
+                    <form
+                        id="study-form"
+                        method="POST"
+                        class="study-form-modern"
+                        enctype="multipart/form-data"
+                    >
+                        <div class="form-container p-4 rounded-4" style="background: linear-gradient(145deg, oklch(20% 0.025 329.708), oklch(18% 0.02 329.708)); border: 1px solid oklch(25% 0.03 329.708); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
+                            
+                            <!-- File Upload Section -->
+                            <div class="file-upload-section mb-4">
+                                <label for="file-input" class="file-upload-label d-flex align-items-center justify-content-center p-4 rounded-3 mb-3" 
+                                       style="background-color: oklch(25% 0.03 329.708); border: 2px dashed oklch(42.621% 0.074 224.389deg); cursor: pointer; transition: all 0.3s ease;">
+                                    <div class="text-center">
+                                        <i class="bi bi-cloud-upload fs-2 mb-2" style="color: oklch(71.996% 0.123 62.756deg);"></i>
+                                        <div class="fw-bold" style="color: oklch(71.996% 0.123 62.756deg);">Choose File</div>
+                                        <small class="fw-italic" style="color: oklch(65.085% 0.06826 64.591);">Supports PDFs or images (PNG/JPG)</small>
+                                    </div>
+                                </label>
+                                <input type="file" id="file-input" name="file" accept=".pdf,.png,.jpg,.jpeg,.heic" class="d-none">
+                                <div id="file-name" class="file-name-display text-center small text-muted"></div>
+                            </div>
+
+                            <!-- Divider -->
+                            <div class="divider-section mb-4">
+                                <div class="d-flex align-items-center">
+                                    <hr class="flex-grow-1" style="border-color: oklch(30% 0.03 329.708);">
+                                    <span class="px-3 small text-muted">OR</span>
+                                    <hr class="flex-grow-1" style="border-color: oklch(30% 0.03 329.708);">
+                                </div>
+                            </div>
+                            
+                            <!-- Text Input Section -->
+                            <div class="text-input-section mb-4">
+                                <div>
+                                    <textarea 
+                                        name="study_material" 
+                                        id="study-input"
+                                        class="form-control custom-textarea" 
+                                        placeholder="Enter your study material here..."
+                                        style="height: 100px; background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg); resize: vertical;"
+                                    ></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- Generate Button -->
+                            <div class="text-center">
+                                <button 
+                                    class="btn btn-lg gen-btn-modern px-5 py-3 fw-bold" 
+                                    type="submit"
+                                    style="background: linear-gradient(135deg, oklch(71.996% 0.123 62.756deg), oklch(65% 0.11 62.756deg)); 
+                                           color: oklch(16.51% 0.015 326.261deg); 
+                                           border: none; 
+                                           border-radius: 50px; 
+                                           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                                           transition: all 0.3s ease;
+                                           min-width: 200px;"
+                                >
+                                    <i class="bi bi-magic me-2"></i>
+                                    Generate Quiz
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quiz Section - Hidden by default, shown when quiz is loaded -->
+            <div x-show="!showWelcome" x-transition class="quiz-section">
+                <div class="quiz-header mb-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h2 class="mb-0">Your Quiz Questions</h2>
+                        <button @click="showWelcome = true" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Create New Quiz
+                        </button>
                     </div>
-                    <input 
-                        name="study_material" 
-                        id="study-input"
-                        class="form-control me-2 mb-2" 
-                        type="text" 
-                        placeholder="Enter study material..." 
-                        aria-label="Search"
-                    >
-                    <button 
-                        class="btn btn-primary gen-btn-color gen-btn-color:hover mt-2 w-50" 
-                        type="submit"
-                    >
-                        Generate
-                    </button>
-                </form>
-            </div>
+                </div>
 
-            <div id="quiz-bank" class="d-inline-block w-100 gap-4 p-5 mt-3 rounded q-bank-color">
-                <h2 class="text-center">Question Bank</h2>
+                <!-- Quiz Container -->
+                <div id="quiz-container" x-data="quizApp()" class="quiz-content">
+                    <!-- Loading State -->
+                    <div x-show="loading" class="text-center py-4">
+                        <div class="spinner-border text-light" role="status">
+                            <span class="visually-hidden">Generating quiz...</span>
+                        </div>
+                        <p class="mt-3">Generating your quiz questions...</p>
+                    </div>
+                    
+                    <!-- Error State -->
+                    <div x-show="error" class="alert alert-danger" role="alert">
+                        <strong>Oops!</strong> <span x-text="error"></span>
+                    </div>
+                    
+                    <!-- Quiz Questions -->
+                    <div x-show="questions.length > 0" class="quiz-container">
+                        <div class="row g-4">
+                            <template x-for="question in questions" :key="question.id">
+                                <div class="col-lg-6 col-xl-4">
+                                    <div class="question-card p-4 rounded h-100" style="background-color: oklch(16% 0.019 329.708);">
+                                        <h5 class="question-text mb-4" x-text="question.text"></h5>
+                                        
+                                        <div class="answers-container">
+                                            <template x-for="(answer, index) in question.answers" :key="index">
+                                                <div class="answer-option mb-3" 
+                                                     @click="selectAnswer(question.id, index)"
+                                                     :class="getAnswerClass(question.id, index)"
+                                                     style="cursor: pointer; transition: all 0.2s ease;">
+                                                    <div class="d-flex align-items-center gap-3 p-3 rounded" style="background-color: oklch(20% 0.025 329.708);">
+                                                        <span class="answer-label badge rounded-pill px-3 py-2" 
+                                                              style="background-color: oklch(34.465% 0.029 199.194);"
+                                                              x-text="String.fromCharCode(65 + index) + '.'">
+                                                        </span>
+                                                        <span class="answer-text flex-grow-1" x-text="answer"></span>
+                                                        
+                                                        <!-- Result indicator -->
+                                                        <div x-show="question.showResult">
+                                                            <i x-show="index === question.correctAnswer" class="bi bi-check-circle-fill text-success"></i>
+                                                            <i x-show="index === question.selectedAnswer && index !== question.correctAnswer" class="bi bi-x-circle-fill text-danger"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        
+                                        <!-- Submit Answer Button -->
+                                        <div x-show="!question.showResult" class="mt-4 text-center">
+                                            <button @click="submitAnswer(question.id)" 
+                                                    :disabled="question.selectedAnswer === null"
+                                                    class="btn gen-btn-color"
+                                                    :class="{'opacity-50': question.selectedAnswer === null}">
+                                                Submit Answer
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Result Message -->
+                                        <div x-show="question.showResult" class="mt-4 text-center">
+                                            <div x-show="question.selectedAnswer === question.correctAnswer" class="text-success">
+                                                <i class="bi bi-check-circle-fill"></i> Correct!
+                                            </div>
+                                            <div x-show="question.selectedAnswer !== question.correctAnswer" class="text-danger">
+                                                <i class="bi bi-x-circle-fill"></i> Incorrect. The correct answer is <span x-text="String.fromCharCode(65 + question.correctAnswer)"></span>.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
         </div>
     </div>
 </div>
