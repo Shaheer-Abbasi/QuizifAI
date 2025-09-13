@@ -18,11 +18,16 @@ from datetime import datetime
 app = Flask(__name__)
 load_dotenv()
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quiz.db'
+# Configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///quiz.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
 app.config['UPLOAD_FOLDER'] = 'static/files'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
+# Handle PostgreSQL URL format for production
+if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://', 1)
 
 db = SQLAlchemy(app)
 
@@ -477,4 +482,10 @@ def upload():
     return redirect(url_for('index'))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Create tables if they don't exist
+    with app.app_context():
+        db.create_all()
+    
+    # Run in development mode
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=os.getenv('FLASK_ENV') == 'development')
