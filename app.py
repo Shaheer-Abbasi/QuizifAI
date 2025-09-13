@@ -1,11 +1,15 @@
 import os
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
-from google import genai
+import google.generativeai as genai
 import logging
 from dotenv import load_dotenv
 from pypdf import PdfReader
 from PIL import Image
-import pytesseract
+try:
+    import pytesseract
+    TESSERACT_AVAILABLE = True
+except ImportError:
+    TESSERACT_AVAILABLE = False
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
@@ -99,14 +103,17 @@ with app.app_context():
     db.create_all()
 
 # AI Client setup
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY"),
-)
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# Configure tesseract if available
+if TESSERACT_AVAILABLE:
+    # Try to find tesseract in common locations
+    import shutil
+    tesseract_path = shutil.which('tesseract')
+    if tesseract_path:
+        pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
 def extract_text_from_pdf(pdf_path):
     print(f"Extracting text from PDF: {pdf_path}")
@@ -122,6 +129,10 @@ def extract_text_from_pdf(pdf_path):
     
 def extract_text_from_image(image_path):
     print(f"Extracting text from image: {image_path}")
+    if not TESSERACT_AVAILABLE:
+        logging.warning("Tesseract not available - cannot extract text from images")
+        return "Image text extraction not available in this deployment. Please use PDF files or copy/paste text directly."
+    
     try:
         image = Image.open(image_path)
         text = pytesseract.image_to_string(image)
@@ -409,9 +420,8 @@ def generate_questions():
         return jsonify({"status": "error", "message": "No input provided"}), 400
 
     try:
-        response = client.models.generate_content(
-            model="gemma-3n-e2b-it",
-            contents="""Create quiz questions from the study material below. Follow these EXACT formatting rules:
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content("""Create quiz questions from the study material below. Follow these EXACT formatting rules:
 
                 RULES:
                 1. Generate 4-5 multiple choice questions
@@ -427,8 +437,7 @@ def generate_questions():
                 What is the capital of France? ; London, Berlin, Paris*, Rome | What is 2+2? ; 3, 4*, 5, 6
 
                 STUDY MATERIAL:
-                """ + user_input,
-                        )
+                """ + user_input)
         
         ai_response = response.text if response and hasattr(response, 'text') else "No response from AI"
         return jsonify({"status": "success", "ai_response": ai_response})
