@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div id="sb" class="col-auto col-md-2 col-xl-1 px-sm-2 px-0 sidebar-custom" >
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 min-vh-100">
+                <a href="{{ url_for('home') }}" id="main-logo" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-decoration-none fs-leckerli-one">
+                    <span class="fs-5 d-none d-sm-inline">QuizifAI</span>
+                </a>
+                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start flex-grow-1">
+                    <li class="nav-item">
+                        <a href="{{ url_for('home') }}" class="nav-link align-middle px-0">
+                            <i class="bi bi-house-door"></i>
+                            <span class="ms-1 d-none d-sm-inline">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('quizzes') }}" class="nav-link px-0 align-middle">
+                            <i class="bi bi-pencil-square"></i>
+                            <span class="ms-1 d-none d-sm-inline">Quizzes</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('analytics') }}" class="nav-link px-0 align-middle">
+                            <i class="bi bi-graph-up-arrow"></i>
+                            <span class="ms-1 d-none d-sm-inline">Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('settings') }}" class="nav-link px-0 align-middle active">
+                            <i class="bi bi-gear"></i>
+                            <span class="ms-1 d-none d-sm-inline">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- User Info and Logout at Bottom -->
+                <div class="w-100 mt-auto mb-3">
+                    <div class="text-center mb-2">
+                        <small class="text-decoration">Welcome, {{ current_user.username }}!</small>
+                    </div>
+                    <div class="d-grid">
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm" style="border-radius: 20px; font-size: 0.85rem;">
+                            <i class="bi bi-box-arrow-right me-1"></i>
+                            <span class="d-none d-sm-inline">Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col p-3 p-md-5">
+            <h1 class="mb-4">Account Settings</h1>
+            
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <!-- Account Settings Card -->
+                    <div class="p-4 rounded mb-4" style="background: linear-gradient(145deg, oklch(20% 0.025 329.708), oklch(18% 0.02 329.708)); border: 1px solid oklch(25% 0.03 329.708); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                        <h3 class="mb-4">Profile Information</h3>
+                        
+                        <form>
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" value="{{ current_user.username }}" readonly
+                                       style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg);">
+                                <small class="text-muted">Username cannot be changed</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" placeholder="Add email address"
+                                       style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg);">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="accountCreated" class="form-label">Account Created</label>
+                                <input type="text" class="form-control" id="accountCreated" value="{{ current_user.created_at.strftime('%B %d, %Y') }}" readonly
+                                       style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg);">
+                            </div>
+                            
+                            <button type="submit" class="btn gen-btn-modern text-muted">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Save Changes
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <!-- Change Password Card -->
+                    <div class="p-4 rounded mb-4" style="background: linear-gradient(145deg, oklch(20% 0.025 329.708), oklch(18% 0.02 329.708)); border: 1px solid oklch(25% 0.03 329.708); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                        <h3 class="mb-4">Change Password</h3>
+                        
+                        <form>
+                            <div class="mb-3">
+                                <label for="currentPassword" class="form-label">Current Password</label>
+                                <input type="password" class="form-control" id="currentPassword" 
+                                       style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg);">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="newPassword" 
+                                       style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg);">
+                                <small class="text-muted">Minimum 8 characters</small>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                <input type="password" class="form-control" id="confirmPassword" 
+                                       style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg);">
+                            </div>
+                            
+                            <button type="submit" class="btn gen-btn-modern text-muted">
+                                <i class="bi bi-shield-lock me-2"></i>
+                                Update Password
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Danger Zone Card -->
+                    <div class="p-4 rounded" style="background: linear-gradient(145deg, oklch(20% 0.025 329.708), oklch(18% 0.02 329.708)); border: 1px solid oklch(25% 0.03 329.708); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                        <h3 class="mb-4 text-danger">Danger Zone</h3>
+                        
+                        <p class="text-danger mb-4">These actions cannot be undone. Please be certain.</p>
+                        
+                        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                            <i class="bi bi-trash me-2"></i>
+                            Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: oklch(20% 0.025 329.708); border: 1px solid oklch(25% 0.03 329.708);">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title" id="deleteAccountModalLabel">Confirm Account Deletion</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                </div>
+                <p>Are you sure you want to delete your account? This will permanently erase all your data including:</p>
+                <ul>
+                    <li>All saved quizzes</li>
+                    <li>Quiz history and performance analytics</li>
+                    <li>Account information</li>
+                </ul>
+                <p class="text-danger">This action cannot be undone.</p>
+                
+                <div class="mb-3">
+                    <label for="deleteConfirmation" class="form-label">Type "DELETE" to confirm</label>
+                    <input type="text" class="form-control" id="deleteConfirmation"
+                           style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg);">
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" disabled>Delete Account</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle delete account confirmation
+        const deleteConfirmField = document.getElementById('deleteConfirmation');
+        const deleteButton = document.querySelector('#deleteAccountModal .btn-danger');
+        
+        if (deleteConfirmField && deleteButton) {
+            deleteConfirmField.addEventListener('input', function() {
+                deleteButton.disabled = this.value !== 'DELETE';
+            });
+        }
+    });
+</script>
+
+{% endblock %}

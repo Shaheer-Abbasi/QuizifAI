@@ -9,36 +9,61 @@
                 <a href="/" id="main-logo" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-decoration-none fs-leckerli-one">
                     <span class="fs-5 d-none d-sm-inline">QuizifAI</span>
                 </a>
-                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start">
+                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start flex-grow-1">
                     <li class="nav-item">
-                        <a href="/" class="nav-link align-middle px-0">
+                        <a href="/" class="nav-link align-middle px-0 active">
                             <i class="bi bi-house-door"></i>
                             <span class="ms-1 d-none d-sm-inline">Home</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="nav-link px-0 align-middle">
+                        <a href="#" class="nav-link px-0 align-middle text-muted" style="cursor: not-allowed;">
                             <i class="bi bi-pencil-square"></i>
                             <span class="ms-1 d-none d-sm-inline">Quizzes</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="nav-link px-0 align-middle">
+                        <a href="#" class="nav-link px-0 align-middle text-muted" style="cursor: not-allowed;">
                             <i class="bi bi-graph-up-arrow"></i>
                             <span class="ms-1 d-none d-sm-inline">Analytics</span>
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="nav-link px-0 align-middle">
+                        <a href="#" class="nav-link px-0 align-middle text-muted" style="cursor: not-allowed;">
                             <i class="bi bi-gear"></i>
                             <span class="ms-1 d-none d-sm-inline">Settings</span>
                         </a>
                     </li>
                 </ul>
+                
+                <!-- Login Button at Bottom -->
+                <div class="w-100 mt-auto mb-3">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('login') }}" class="btn login-btn-sidebar fw-bold" style="background: linear-gradient(135deg, oklch(71.996% 0.123 62.756deg), oklch(65% 0.11 62.756deg)); color: oklch(16.51% 0.015 326.261deg); border: none; border-radius: 25px; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2); transition: all 0.3s ease; text-decoration: none; padding: 0.75rem;">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            <span class="d-none d-sm-inline">Login</span>
+                        </a>
+                        <a href="{{ url_for('register') }}" class="btn btn-outline-light btn-sm" style="border-radius: 20px; font-size: 0.85rem;">
+                            <i class="bi bi-person-plus me-1"></i>
+                            <span class="d-none d-sm-inline">Sign Up</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="col p-3 p-md-5" x-data="{ showWelcome: true }">
+        <div class="col p-3 p-md-5" x-data="{ showWelcome: true }" x-on:show-quiz.window="showWelcome = false">
+            <!-- Loading Overlay - Hidden by default, only shown when form is submitted -->
+            <div id="loadingOverlay" class="position-fixed top-0 start-0 w-100 h-100 d-none align-items-center justify-content-center" style="background-color: rgba(0, 0, 0, 0.7); z-index: 1050;">
+                <div class="loading-container mx-auto" style="max-width: 500px;">
+                    <div class="spinner-border text-light mb-3" role="status">
+                        <span class="visually-hidden">Generating quiz...</span>
+                    </div>
+                    <h4 class="mb-2 text-light">Generating Your Quiz</h4>
+                    <p class="text-light mb-0">Our AI is analyzing your study material and creating personalized questions...</p>
+                </div>
+            </div>
+
             <!-- Welcome Section - Hidden when quiz is loaded -->
             <div x-show="showWelcome" x-transition class="welcome-section text-center">
                 <h1 class="welcome-title">
@@ -46,7 +71,7 @@
                     <br>
                     your AI-powered quiz platform.
                     <br>
-                    <small class="mute-color">Your journey to smarter quizzes starts here.</small>
+                    <small class="mute-color">Practice mode - Generate questions and test yourself instantly!</small>
                     <br>
                 </h1>
 
@@ -66,7 +91,7 @@
                                     <div class="text-center">
                                         <i class="bi bi-cloud-upload fs-2 mb-2" style="color: oklch(71.996% 0.123 62.756deg);"></i>
                                         <div class="fw-bold" style="color: oklch(71.996% 0.123 62.756deg);">Choose File</div>
-                                        <small class="fw-italic" style="color: oklch(65.085% 0.06826 64.591);">Supports PDFs or images (PNG/JPG)</small>
+                                        <small class="text-muted">Supports PDFs or images (PNG/JPG)</small>
                                     </div>
                                 </label>
                                 <input type="file" id="file-input" name="file" accept=".pdf,.png,.jpg,.jpeg,.heic" class="d-none">
@@ -112,6 +137,14 @@
                                     Generate Quiz
                                 </button>
                             </div>
+
+                            <!-- Guest Mode Notice -->
+                            <div class="mt-3 text-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Guest mode - <a href="{{ url_for('login') }}" class="text-decoration-none" style="color: oklch(71.996% 0.123 62.756deg);">Sign in</a> to save questions and track progress
+                                </small>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -121,31 +154,26 @@
             <div x-show="!showWelcome" x-transition class="quiz-section">
                 <div class="quiz-header mb-4">
                     <div class="d-flex align-items-center justify-content-between">
-                        <h2 class="mb-0">Your Quiz Questions</h2>
+                        <h2 class="mb-0">Practice Quiz</h2>
                         <button @click="showWelcome = true" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-arrow-left me-2"></i>
-                            Create New Quiz
+                            Generate New Questions
                         </button>
                     </div>
                 </div>
 
                 <!-- Quiz Container -->
-                <div id="quiz-container" x-data="quizApp()" class="quiz-content">
-                    <!-- Loading State -->
-                    <div x-show="loading" class="text-center py-4">
-                        <div class="spinner-border text-light" role="status">
-                            <span class="visually-hidden">Generating quiz...</span>
-                        </div>
-                        <p class="mt-3">Generating your quiz questions...</p>
-                    </div>
-                    
+                <div id="quiz-container" x-data="quizApp" class="quiz-content">
                     <!-- Error State -->
                     <div x-show="error" class="alert alert-danger" role="alert">
                         <strong>Oops!</strong> <span x-text="error"></span>
                     </div>
                     
                     <!-- Quiz Questions -->
-                    <div x-show="questions.length > 0" class="quiz-container">
+                    <div x-show="questions.length > 0" class="questions-container">
+                        <div class="mb-4">
+                            <p class="text-muted">Here are your generated questions:</p>
+                        </div>
                         <div class="row g-4">
                             <template x-for="question in questions" :key="question.id">
                                 <div class="col-lg-6 col-xl-4">
@@ -201,7 +229,6 @@
                     </div>
                 </div>
             </div>
-        </div>
         </div>
     </div>
 </div>
