@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div id="sb" class="col-auto col-md-2 col-xl-1 px-sm-2 px-0 sidebar-custom" >
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 min-vh-100">
+                <a href="{{ url_for('home') }}" id="main-logo" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-decoration-none fs-leckerli-one">
+                    <span class="fs-5 d-none d-sm-inline">QuizifAI</span>
+                </a>
+                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start flex-grow-1">
+                    <li class="nav-item">
+                        <a href="{{ url_for('home') }}" class="nav-link align-middle px-0">
+                            <i class="bi bi-house-door"></i>
+                            <span class="ms-1 d-none d-sm-inline">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('quizzes') }}" class="nav-link px-0 align-middle active">
+                            <i class="bi bi-pencil-square"></i>
+                            <span class="ms-1 d-none d-sm-inline">Quizzes</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('analytics') }}" class="nav-link px-0 align-middle">
+                            <i class="bi bi-graph-up-arrow"></i>
+                            <span class="ms-1 d-none d-sm-inline">Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('settings') }}" class="nav-link px-0 align-middle">
+                            <i class="bi bi-gear"></i>
+                            <span class="ms-1 d-none d-sm-inline">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- User Info and Logout at Bottom -->
+                <div class="w-100 mt-auto mb-3">
+                    <div class="text-center mb-2">
+                        <small class="text-decoration">Welcome, {{ current_user.username }}!</small>
+                    </div>
+                    <div class="d-grid">
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm" style="border-radius: 20px; font-size: 0.85rem;">
+                            <i class="bi bi-box-arrow-right me-1"></i>
+                            <span class="d-none d-sm-inline">Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col p-3 p-md-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="mb-0">{{ quiz.title }}</h1>
+                <a href="{{ url_for('quizzes') }}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left me-2"></i>
+                    Back to Quizzes
+                </a>
+            </div>
+            
+            <!-- Quiz Content -->
+            <div class="quiz-container" x-data="quizApp" x-init="init()">
+                <!-- Loading Indicator -->
+                <div x-show="loading" class="text-center p-5">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Loading quiz...</p>
+                </div>
+                
+                <template x-if="!loading && !quizSubmitted">
+                    <div>
+                        <!-- Quiz Progress -->
+                        <div class="quiz-progress">
+                            <div class="quiz-progress-bar" :style="`width: ${getProgressPercentage()}%`"></div>
+                        </div>
+                        
+                        <!-- Question Counter -->
+                        <div class="question-number">
+                            Question <span x-text="currentQuestionIndex + 1"></span> of <span x-text="questions.length"></span>
+                        </div>
+                        
+                        <!-- Current Question -->
+                        <div class="question-text" x-text="questions[currentQuestionIndex].question_text"></div>
+                        
+                        <!-- Answer Options -->
+                        <div class="answer-options">
+                            <template x-for="(option, index) in questions[currentQuestionIndex].options" :key="index">
+                                <div 
+                                    class="answer-option" 
+                                    :id="`answer-${currentQuestionIndex}-${index}`"
+                                    :class="{ 'selected-answer': isSelected(currentQuestionIndex, index) }"
+                                    @click="selectAnswer(currentQuestionIndex, index)">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="option-letter" x-text="['A', 'B', 'C', 'D'][index]"></span>
+                                        <span class="flex-grow-1" x-text="option"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        
+                        <!-- Navigation Buttons -->
+                        <div class="quiz-nav-buttons">
+                            <button 
+                                @click="previousQuestion()" 
+                                class="btn btn-outline-light quiz-nav-btn"
+                                :disabled="currentQuestionIndex === 0">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Previous
+                            </button>
+                            
+                            <button 
+                                @click="nextQuestion()" 
+                                class="btn btn-outline-light quiz-nav-btn"
+                                :disabled="currentQuestionIndex === questions.length - 1">
+                                Next
+                                <i class="bi bi-arrow-right ms-2"></i>
+                            </button>
+                            
+                            <button 
+                                @click="submitQuiz()" 
+                                class="btn btn-primary quiz-nav-btn">
+                                Submit Quiz
+                            </button>
+                        </div>
+                    </div>
+                </template>
+                
+                <!-- Quiz Results -->
+                <template x-if="!loading && quizSubmitted">
+                    <div class="quiz-result">
+                        <div class="quiz-score">
+                            <span x-text="score"></span>/<span x-text="questions.length"></span>
+                        </div>
+                        
+                        <div class="quiz-feedback" x-text="getFeedbackMessage()"></div>
+                        
+                        <div class="mt-4">
+                            <a href="{{ url_for('take_quiz', quiz_id=quiz.id) }}" class="btn btn-outline-light me-2">
+                                <i class="bi bi-arrow-repeat me-2"></i>
+                                Retake Quiz
+                            </a>
+                            <a href="{{ url_for('quizzes') }}" class="btn btn-primary">
+                                <i class="bi bi-collection me-2"></i>
+                                Back to Quizzes
+                            </a>
+                        </div>
+
+                        <div class="mt-5">
+                            <template x-for="(question, index) in questions" :key="index">
+                                <div class="result-question">
+                                    <div class="question-text" x-text="question.question_text"></div>
+                                    <div class="answer-options">
+                                        <template x-for="(option, optionIndex) in question.options" :key="optionIndex">
+                                            <div class="answer-option" :class="{ 'correct-answer': optionIndex === question.correct_answer, 'incorrect-answer': userAnswers[index] === optionIndex && optionIndex !== question.correct_answer }">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <span class="option-letter" x-text="['A', 'B', 'C', 'D'][optionIndex]"></span>
+                                                    <span class="flex-grow-1" x-text="option"></span>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,12 +1,5 @@
 <!DOCTYPE html>
-<html l    <script 
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" 
-        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" 
-        crossorigin="anonymous">
-    </script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,6 +15,44 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Leckerli+One&display=swap" rel="stylesheet">
+    <!-- Quiz Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/quiz.css') }}">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        /* Alpine cloak to prevent flash of unstyled content */
+        [x-cloak] { display: none !important; }
+        
+        /* Animation for quiz taking */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .selected-answer div {
+            background-color: oklch(25% 0.03 329.708) !important;
+            border: 2px solid oklch(71.996% 0.123 62.756deg) !important;
+        }
+        
+        .correct-answer div {
+            background-color: oklch(22% 0.025 131.116deg) !important;
+            border: 2px solid oklch(74.722% 0.072 131.116deg) !important;
+        }
+        
+        .incorrect-answer div {
+            background-color: oklch(22% 0.025 31.871deg) !important;
+            border: 2px solid oklch(77.318% 0.128 31.871deg) !important;
+        }
+        
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
     <title>QuizifAI</title>
 </head>
 <body>
@@ -35,169 +66,15 @@
         crossorigin="anonymous">
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        // Alpine.js Quiz Component
-        function quizApp() {
-            return {
-                questions: [],
-                loading: false,
-                error: null,
-                
-                async submitForm(formData) {
-                    this.loading = true;
-                    this.error = null;
-                    
-                    try {
-                        const response = await fetch('/', {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        });
-                        
-                        if (!response.ok) {
-                            throw new Error('Failed to generate quiz');
-                        }
-                        
-                        const data = await response.json();
-                        const aiResponse = data[1]?.ai_response || data.ai_response;
-                        
-                        if (!aiResponse || aiResponse === "No response from AI") {
-                            throw new Error('No quiz generated');
-                        }
-                        
-                        console.log('AI Response:', aiResponse);
-                        this.parseQuestions(aiResponse);
-                        
-                        // Switch to quiz view after successful generation
-                        this.switchToQuizView();
-                        
-                    } catch (err) {
-                        this.error = err.message;
-                        console.error('Error:', err);
-                    } finally {
-                        this.loading = false;
-                    }
-                },
-                
-                parseQuestions(aiResponse) {
-                    const questionArray = aiResponse.split('|');
-                    this.questions = [];
-                    
-                    questionArray.forEach((question, index) => {
-                        if (question.trim()) {
-                            const parts = question.split(';');
-                            if (parts.length >= 2) {
-                                const questionText = parts[0].trim();
-                                const answers = parts[1].split(',').map(a => a.trim());
-                                
-                                // Find correct answer (marked with *)
-                                const correctIndex = answers.findIndex(answer => answer.includes('*'));
-                                const cleanAnswers = answers.map(answer => answer.replace('*', '').trim());
-                                
-                                this.questions.push({
-                                    id: index,
-                                    text: questionText,
-                                    answers: cleanAnswers,
-                                    correctAnswer: correctIndex >= 0 ? correctIndex : 0,
-                                    selectedAnswer: null,
-                                    showResult: false
-                                });
-                            }
-                        }
-                    });
-                },
-                
-                switchToQuizView() {
-                    // Get the main container's Alpine data to switch views
-                    const mainContainer = document.querySelector('[x-data*="showWelcome"]');
-                    if (mainContainer && mainContainer._x_dataStack) {
-                        mainContainer._x_dataStack[0].showWelcome = false;
-                    }
-                },
-                
-                selectAnswer(questionId, answerIndex) {
-                    const question = this.questions.find(q => q.id === questionId);
-                    if (question) {
-                        question.selectedAnswer = answerIndex;
-                    }
-                },
-                
-                submitAnswer(questionId) {
-                    const question = this.questions.find(q => q.id === questionId);
-                    if (question && question.selectedAnswer !== null) {
-                        question.showResult = true;
-                    }
-                },
-                
-                resetQuiz() {
-                    this.questions = [];
-                    this.error = null;
-                    
-                    // Switch back to welcome view
-                    const mainContainer = document.querySelector('[x-data*="showWelcome"]');
-                    if (mainContainer && mainContainer._x_dataStack) {
-                        mainContainer._x_dataStack[0].showWelcome = true;
-                    }
-                },
-                
-                getAnswerClass(questionId, answerIndex) {
-                    const question = this.questions.find(q => q.id === questionId);
-                    if (!question || !question.showResult) {
-                        return question?.selectedAnswer === answerIndex ? 'selected' : '';
-                    }
-                    
-                    if (answerIndex === question.correctAnswer) {
-                        return 'correct';
-                    } else if (answerIndex === question.selectedAnswer && answerIndex !== question.correctAnswer) {
-                        return 'incorrect';
-                    }
-                    return '';
-                }
-            }
-        }
-        
-        // Legacy jQuery for form handling (we'll keep this for now but use Alpine for quiz display)
-        $(document).ready(function() {
-            var $studyForm = $("#study-form");
-            var $fileInput = $("#file-input");
-            var $fileLabel = $(".file-upload-label");
-            var $fileName = $("#file-name");
-            
-            // File upload UI handling
-            $fileInput.on('change', function() {
-                const file = this.files[0];
-                if (file) {
-                    $fileName.text(`Selected: ${file.name}`);
-                    $fileLabel.addClass('file-selected');
-                    $fileLabel.find('.fw-bold').text('File Selected');
-                } else {
-                    $fileName.text('');
-                    $fileLabel.removeClass('file-selected');
-                    $fileLabel.find('.fw-bold').text('Choose File');
-                }
-            });
-            
-            if ($studyForm.length) {
-                $studyForm.submit(function(e) {
-                    e.preventDefault();
-                    var formData = new FormData(this);
-                    
-                    // Get Alpine component instance
-                    const quizContainer = document.getElementById('quiz-container');
-                    if (quizContainer && quizContainer._x_dataStack) {
-                        const quizComponent = quizContainer._x_dataStack[0];
-                        quizComponent.submitForm(formData);
-                        this.reset();
-                        
-                        // Reset file upload UI
-                        $fileName.text('');
-                        $fileLabel.removeClass('file-selected');
-                        $fileLabel.find('.fw-bold').text('Choose File');
-                    }
-                });
-            }
-        });
-    </script>
+    
+    <!-- Page-specific scripts -->
+    {% set current_page = request.endpoint %}
+    {% if current_page == 'take_quiz' %}
+    <script src="{{ url_for('static', filename='take_quiz.js') }}"></script>
+    {% elif current_page == 'home' %}
+    <script src="{{ url_for('static', filename='home.js', v='1.1') }}"></script>
+    {% elif current_page == 'index' %}
+    <script src="{{ url_for('static', filename='guest.js', v='1.1') }}"></script>
+    {% endif %}
+</body>
 </html>

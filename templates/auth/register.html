@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, oklch(16.51% 0.015 326.261deg), oklch(20% 0.025 329.708));">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-6 col-lg-4">
+            <div class="auth-card p-5 rounded-4" style="background: linear-gradient(145deg, oklch(20% 0.025 329.708), oklch(18% 0.02 329.708)); border: 1px solid oklch(25% 0.03 329.708); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);">
+                <!-- Logo -->
+                <div class="text-center mb-4">
+                    <h2 class="fs-leckerli-one" style="color: oklch(71.996% 0.123 62.756deg);">QuizifAI</h2>
+                    <p class="text-muted">Create your account</p>
+                </div>
+
+                <!-- Register Form -->
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <div class="form-floating">
+                            {{ form.username(class="form-control custom-input", style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg);") }}
+                            <label for="username" style="color: oklch(60% 0.08 62.756deg);">Username</label>
+                        </div>
+                        {% if form.username.errors %}
+                            <small class="text-danger">{{ form.username.errors[0] }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-floating">
+                            {{ form.password(class="form-control custom-input", style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg);") }}
+                            <label for="password" style="color: oklch(60% 0.08 62.756deg);">Password</label>
+                        </div>
+                        {% if form.password.errors %}
+                            <small class="text-danger">{{ form.password.errors[0] }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        {{ form.submit(class="btn btn-lg gen-btn-modern fw-bold", style="background: linear-gradient(135deg, oklch(71.996% 0.123 62.756deg), oklch(65% 0.11 62.756deg)); color: oklch(16.51% 0.015 326.261deg); border: none; border-radius: 50px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); transition: all 0.3s ease;") }}
+                    </div>
+                </form>
+
+                <!-- Links -->
+                <div class="text-center">
+                    <p class="mb-2">
+                        <small class="text-muted">Already have an account? </small>
+                        <a href="{{ url_for('login') }}" class="text-decoration-none" style="color: oklch(71.996% 0.123 62.756deg);">Sign in</a>
+                    </p>
+                    <p class="mb-0">
+                        <small class="text-muted">Or continue as </small>
+                        <a href="{{ url_for('index') }}" class="text-decoration-none" style="color: oklch(71.996% 0.123 62.756deg);">guest</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

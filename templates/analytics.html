@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div id="sb" class="col-auto col-md-2 col-xl-1 px-sm-2 px-0 sidebar-custom" >
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 min-vh-100">
+                <a href="{{ url_for('home') }}" id="main-logo" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-decoration-none fs-leckerli-one">
+                    <span class="fs-5 d-none d-sm-inline">QuizifAI</span>
+                </a>
+                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start flex-grow-1">
+                    <li class="nav-item">
+                        <a href="{{ url_for('home') }}" class="nav-link align-middle px-0">
+                            <i class="bi bi-house-door"></i>
+                            <span class="ms-1 d-none d-sm-inline">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('quizzes') }}" class="nav-link px-0 align-middle">
+                            <i class="bi bi-pencil-square"></i>
+                            <span class="ms-1 d-none d-sm-inline">Quizzes</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('analytics') }}" class="nav-link px-0 align-middle active">
+                            <i class="bi bi-graph-up-arrow"></i>
+                            <span class="ms-1 d-none d-sm-inline">Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('settings') }}" class="nav-link px-0 align-middle">
+                            <i class="bi bi-gear"></i>
+                            <span class="ms-1 d-none d-sm-inline">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- User Info and Logout at Bottom -->
+                <div class="w-100 mt-auto mb-3">
+                    <div class="text-center mb-2">
+                        <small class="text-decoration">Welcome, {{ current_user.username }}!</small>
+                    </div>
+                    <div class="d-grid">
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm" style="border-radius: 20px; font-size: 0.85rem;">
+                            <i class="bi bi-box-arrow-right me-1"></i>
+                            <span class="d-none d-sm-inline">Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col p-3 p-md-5">
+            <h1 class="mb-4">Performance Analytics</h1>
+            
+            {% if attempts %}
+                <!-- Overview Cards -->
+                <div class="row g-4 mb-5">
+                    <div class="col-md-4">
+                        <div class="p-4 rounded" style="background: linear-gradient(145deg, #1a1a1a, #181818); border: 1px solid #252526; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                            <h4>Total Attempts</h4>
+                            <div class="d-flex align-items-end">
+                                <span class="display-4 me-2">{{ attempts|length }}</span>
+                                <span class="text-muted">quizzes taken</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-4 rounded" style="background: linear-gradient(145deg, #1a1a1a, #181818); border: 1px solid #252526; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                            <h4>Average Score</h4>
+                            <div class="d-flex align-items-end">
+                                {% if attempts|length > 0 %}
+                                {% set avg_score = (attempts|map(attribute='score')|sum / attempts|length) %}
+                                {% set avg_percent = (avg_score / attempts[0].total_questions) * 100 %}
+                                {% else %}
+                                {% set avg_percent = 0 %}
+                                {% endif %}
+                                <span class="display-4 me-2">{{ "%.1f"|format(avg_percent) }}%</span>
+                                <span class="text-muted">correct answers</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-4 rounded" style="background: linear-gradient(145deg, #1a1a1a, #181818); border: 1px solid #252526; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                            <h4>Best Score</h4>
+                            <div class="d-flex align-items-end">
+                                {% if attempts|length > 0 %}
+                                {% set best_score = attempts|map(attribute='score')|max %}
+                                {% set best_percent = (best_score / attempts[0].total_questions) * 100 %}
+                                {% else %}
+                                {% set best_percent = 0 %}
+                                {% endif %}
+                                <span class="display-4 me-2">{{ "%.1f"|format(best_percent) }}%</span>
+                                <span class="text-muted">highest performance</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Chart -->
+                <div class="mb-5 p-4 rounded" style="background: linear-gradient(145deg, #1a1a1a, #181818); border: 1px solid #252526; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                    <h3 class="mb-4">Progress Over Time</h3>
+                    <!-- Hidden element to store chart data -->
+                    <div id="chart-data" style="display: none;">
+                        {# Convert attempt data to JSON for the chart #}
+                        {% set chart_data = {'labels': [], 'percentages': []} %}
+                        {% for attempt in attempts|sort(attribute='completed_at') %}
+                            {% set _ = chart_data.labels.append(attempt.completed_at.strftime('%Y-%m-%d')) %}
+                            {% set percent = (attempt.score / attempt.total_questions) * 100 %}
+                            {% set _ = chart_data.percentages.append(percent) %}
+                        {% endfor %}
+                        {{ chart_data|tojson }}
+                    </div>
+                    <div style="height: 300px;">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <h3 class="mb-4">Recent Quiz Attempts</h3>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Quiz</th>
+                                <th>Score</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in attempts|sort(attribute='completed_at', reverse=True) if loop.index <= 10 %}
+                                <tr>
+                                    <td>{{ attempt.completed_at.strftime('%b %d, %Y') }}</td>
+                                    <td>{{ attempt.quiz.title }}</td>
+                                    <td>{{ attempt.score }} / {{ attempt.total_questions }}</td>
+                                    <td>
+                                        {% set percent = (attempt.score / attempt.total_questions) * 100 %}
+                                        <div class="progress" style="height: 10px; background-color: #252526;">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {{ percent }}%; background-color: #6ca0f5;" 
+                                                 aria-valuenow="{{ percent }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                        <small class="ms-2">{{ "%.1f"|format(percent) }}%</small>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Get chart context
+                        const ctx = document.getElementById('progressChart').getContext('2d');
+                        
+                        // Parse data from a hidden element that contains JSON
+                        const chartDataElement = document.getElementById('chart-data');
+                        const chartData = JSON.parse(chartDataElement.textContent);
+                        
+                        // Create chart
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: chartData.labels,
+                                datasets: [{
+                                    label: 'Score (%)',
+                                    data: chartData.percentages,
+                                    borderColor: '#6ca0f5',
+                                    backgroundColor: 'rgba(108, 160, 245, 0.1)',
+                                    tension: 0.3,
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        max: 100,
+                                        ticks: {
+                                            color: 'rgba(255, 255, 255, 0.7)'
+                                        },
+                                        grid: {
+                                            color: 'rgba(255, 255, 255, 0.1)'
+                                        }
+                                    },
+                                    x: {
+                                        ticks: {
+                                            color: 'rgba(255, 255, 255, 0.7)'
+                                        },
+                                        grid: {
+                                            color: 'rgba(255, 255, 255, 0.1)'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    });
+                </script>
+                
+            {% else %}
+                <div class="text-center py-5 my-5">
+                    <div class="mb-4">
+                        <i class="bi bi-bar-chart" style="font-size: 3rem; color: #6ca0f5;"></i>
+                    </div>
+                    <h3>No Quiz Attempts Yet</h3>
+                    <p class="text-muted">Take quizzes to start tracking your progress and performance.</p>
+                    <a href="{{ url_for('quizzes') }}" class="btn gen-btn-modern mt-3 text-muted">
+                        <i class="bi bi-play-circle me-2"></i>
+                        Start a Quiz
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
