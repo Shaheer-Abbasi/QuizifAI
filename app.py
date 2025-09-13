@@ -1,11 +1,15 @@
 import os
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
-from google import genai
+import google.generativeai as genai
 import logging
 from dotenv import load_dotenv
 from pypdf import PdfReader
 from PIL import Image
-import pytesseract
+try:
+    import pytesseract
+    TESSERACT_AVAILABLE = True
+except ImportError:
+    TESSERACT_AVAILABLE = False
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
@@ -104,9 +108,14 @@ client = genai.Client(
 )
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# Configure tesseract if available
+if TESSERACT_AVAILABLE:
+    # Try to find tesseract in common locations
+    import shutil
+    tesseract_path = shutil.which('tesseract')
+    if tesseract_path:
+        pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
 def extract_text_from_pdf(pdf_path):
     print(f"Extracting text from PDF: {pdf_path}")
@@ -122,6 +131,10 @@ def extract_text_from_pdf(pdf_path):
     
 def extract_text_from_image(image_path):
     print(f"Extracting text from image: {image_path}")
+    if not TESSERACT_AVAILABLE:
+        logging.warning("Tesseract not available - cannot extract text from images")
+        return "Image text extraction not available in this deployment. Please use PDF files or copy/paste text directly."
+    
     try:
         image = Image.open(image_path)
         text = pytesseract.image_to_string(image)
