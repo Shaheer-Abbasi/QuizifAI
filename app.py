@@ -103,9 +103,7 @@ with app.app_context():
     db.create_all()
 
 # AI Client setup
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY"),
-)
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -422,9 +420,8 @@ def generate_questions():
         return jsonify({"status": "error", "message": "No input provided"}), 400
 
     try:
-        response = client.models.generate_content(
-            model="gemma-3n-e2b-it",
-            contents="""Create quiz questions from the study material below. Follow these EXACT formatting rules:
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        response = model.generate_content("""Create quiz questions from the study material below. Follow these EXACT formatting rules:
 
                 RULES:
                 1. Generate 4-5 multiple choice questions
@@ -440,8 +437,7 @@ def generate_questions():
                 What is the capital of France? ; London, Berlin, Paris*, Rome | What is 2+2? ; 3, 4*, 5, 6
 
                 STUDY MATERIAL:
-                """ + user_input,
-                        )
+                """ + user_input)
         
         ai_response = response.text if response and hasattr(response, 'text') else "No response from AI"
         return jsonify({"status": "success", "ai_response": ai_response})
