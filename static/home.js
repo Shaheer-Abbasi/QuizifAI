@@ -5,15 +5,19 @@ document.addEventListener('alpine:init', () => {
         quizzes: [],
         showQuizModal: false,
         selectedQuestionId: null,
+        newQuizName: '',
         
         init() {
+            console.log('Alpine component initialized');
             this.fetchQuizzes();
         },
 
         fetchQuizzes() {
+            console.log('Fetching quizzes...');
             fetch('/api/quizzes')
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Quizzes fetched:', data);
                     this.quizzes = data;
                 });
         },
@@ -75,8 +79,48 @@ document.addEventListener('alpine:init', () => {
         },
         
         openQuizModal(questionId) {
+            console.log('Opening quiz modal for question:', questionId);
             this.selectedQuestionId = questionId;
             this.showQuizModal = true;
+            console.log('showQuizModal set to:', this.showQuizModal);
+        },
+        
+        closeQuizModal() {
+            this.showQuizModal = false;
+            this.selectedQuestionId = null;
+            this.newQuizName = '';
+        },
+        
+        async createAndSaveToNewQuiz() {
+            if (!this.newQuizName || !this.newQuizName.trim()) return;
+            
+            try {
+                const response = await fetch('/create-quiz', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({ title: this.newQuizName.trim() })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // Refresh quiz data to get the newly created quiz
+                    await this.fetchQuizzes();
+                    
+                    // Use the quiz_id returned from the API
+                    await this.saveQuestion(data.quiz_id);
+                    
+                    // Close the modal and reset form
+                    this.closeQuizModal();
+                } else {
+                    throw new Error(data.message || 'Failed to create quiz');
+                }
+            } catch (error) {
+                console.error('Error creating quiz:', error);
+                this.error = error.message;
+            }
         },
 
         async saveQuestion(quizId) {
@@ -103,6 +147,8 @@ document.addEventListener('alpine:init', () => {
                 
                 if (data.status === 'success') {
                     question.saved = true;
+                    // Refresh quiz data to update question counts
+                    await this.fetchQuizzes();
                     this.showQuizModal = false;
                 } else {
                     throw new Error(data.message || 'Failed to save question');
@@ -123,6 +169,53 @@ document.addEventListener('alpine:init', () => {
             for (const question of unsavedQuestions) {
                 await this.saveQuestion(null); // Save to default quiz
             }
+        }, 
+
+        closeQuizModal() {
+            console.log('Closing quiz modal');
+            this.showQuizModal = false;
+            this.selectedQuestionId = null;
+            this.newQuizName = '';
+        },
+    
+        async createAndSaveToNewQuiz() {
+            if (!this.newQuizName || !this.newQuizName.trim()) return;
+            
+            try {
+                // Create new quiz first
+                const response = await fetch('/create-quiz', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({ title: this.newQuizName.trim() })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // Refresh quizzes list
+                    await this.fetchQuizzes();
+                    
+                    // Save to the new quiz
+                    await this.saveQuestion(data.quiz_id);
+                } else {
+                    throw new Error(data.message || 'Failed to create quiz');
+                }
+                
+            } catch (error) {
+                console.error('Error creating quiz:', error);
+                this.error = error.message;
+            }
+        },
+    
+        // Update your existing openQuizModal method to reset newQuizName
+        openQuizModal(questionId) {
+            console.log('Opening quiz modal for question:', questionId);
+            this.selectedQuestionId = questionId;
+            this.newQuizName = ''; // Reset the input
+            this.showQuizModal = true;
+            console.log('showQuizModal set to:', this.showQuizModal);
         }
     }));
 });

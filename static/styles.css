@@ -3,7 +3,7 @@ body {
   color: oklch(71.996% 0.123 62.756deg);
   margin: 0;
   padding: 0;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   /* Removed overflow: hidden to allow vertical scrolling */
 }
 
@@ -369,7 +369,7 @@ body {
 
 @media (max-width: 768px) {
   .welcome-title {
-    font-.size: 1.8rem;
+    font-size: 1.8rem;
     margin-bottom: 1.5rem;
   }
 }
@@ -497,4 +497,113 @@ body {
 .q-bank-color {
   background-color: oklch(24% 0.023 329.708deg) !important;
   height: 50%;
+}
+
+/* Custom Modal Styles */
+.custom-modal {
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+/* Create Quiz Modal - Hidden by default */
+.create-quiz-modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.custom-modal-content {
+  background-color: oklch(20% 0.025 329.708);
+  color: oklch(71.996% 0.123 62.756deg);
+  margin: 5% auto;
+  padding: 0;
+  border: 1px solid oklch(25% 0.03 329.708);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.custom-modal-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid oklch(25% 0.03 329.708);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.custom-modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.custom-modal-close {
+  background: none;
+  border: none;
+  color: oklch(71.996% 0.123 62.756deg);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.custom-modal-close:hover {
+  background-color: oklch(25% 0.03 329.708);
+}
+
+.custom-modal-body {
+  padding: 1.5rem;
+}
+
+.custom-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid oklch(25% 0.03 329.708);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .custom-modal-content {
+    margin: 10% auto;
+    width: 95%;
+  }
+  
+  .custom-modal-header,
+  .custom-modal-body,
+  .custom-modal-footer {
+    padding: 1rem;
+  }
 }/*# sourceMappingURL=styles.css.map */

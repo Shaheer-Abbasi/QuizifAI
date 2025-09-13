@@ -184,12 +184,17 @@ def create_quiz():
     # Create a new quiz
     title = request.form.get('title')
     if not title:
+        if request.headers.get('Content-Type') == 'application/x-www-form-urlencoded':
+            return jsonify({"status": "error", "message": "Quiz title is required"}), 400
         flash('Quiz title is required')
         return redirect(url_for('quizzes'))
     
     new_quiz = Quiz(title=title, user_id=current_user.id)
     db.session.add(new_quiz)
     db.session.commit()
+    
+    if request.headers.get('Content-Type') == 'application/x-www-form-urlencoded':
+        return jsonify({"status": "success", "message": "Quiz created successfully!", "quiz_id": new_quiz.id})
     
     flash('Quiz created successfully!')
     return redirect(url_for('quizzes'))
@@ -243,7 +248,15 @@ def get_quiz_data(quiz_id):
 @login_required
 def get_quizzes():
     user_quizzes = Quiz.query.filter_by(user_id=current_user.id).all()
-    return jsonify([{'id': quiz.id, 'title': quiz.title} for quiz in user_quizzes])
+    quizzes_data = []
+    for quiz in user_quizzes:
+        question_count = Question.query.filter_by(quiz_id=quiz.id).count()
+        quizzes_data.append({
+            'id': quiz.id, 
+            'title': quiz.title,
+            'question_count': question_count
+        })
+    return jsonify(quizzes_data)
 
 @app.route('/submit_quiz', methods=['POST'])
 @login_required
@@ -291,9 +304,69 @@ def submit_quiz():
 @app.route('/analytics')
 @login_required
 def analytics():
-    # User's quiz performance analytics
-    attempts = QuizAttempt.query.filter_by(user_id=current_user.id).all()
-    return render_template('analytics.html', attempts=attempts)
+    # Get selected quiz filter from query parameter
+    selected_quiz_id = request.args.get('quiz_id', type=int)
+    
+    # Get all user's quizzes for the dropdown
+    user_quizzes = Quiz.query.filter_by(user_id=current_user.id).all()
+    
+    # Filter attempts based on selected quiz
+    if selected_quiz_id:
+        attempts = QuizAttempt.query.filter_by(
+            user_id=current_user.id, 
+            quiz_id=selected_quiz_id
+        ).order_by(QuizAttempt.completed_at.asc()).all()
+        selected_quiz = Quiz.query.get(selected_quiz_id)
+        filter_title = selected_quiz.title if selected_quiz else f"Quiz {selected_quiz_id}"
+    else:
+        # Show all attempts
+        attempts = QuizAttempt.query.filter_by(user_id=current_user.id).order_by(QuizAttempt.completed_at.asc()).all()
+        filter_title = "All Quizzes"
+    
+    # Prepare data for Chart.js
+    chart_data = []
+    quiz_names = {}
+    
+    # Get quiz names
+    for attempt in attempts:
+        if attempt.quiz_id not in quiz_names:
+            quiz = Quiz.query.get(attempt.quiz_id)
+            quiz_names[attempt.quiz_id] = quiz.title if quiz else f"Quiz {attempt.quiz_id}"
+    
+    # Prepare time series data
+    for attempt in attempts:
+        chart_data.append({
+            'date': attempt.completed_at.strftime('%Y-%m-%d'),
+            'score': round((attempt.score / attempt.total_questions) * 100, 2),
+            'quiz_name': quiz_names[attempt.quiz_id],
+            'raw_score': f"{attempt.score}/{attempt.total_questions}"
+        })
+    
+    # Calculate statistics
+    total_attempts = len(attempts)
+    if total_attempts > 0:
+        avg_score = sum(attempt.score / attempt.total_questions for attempt in attempts) / total_attempts * 100
+        best_score = max(attempt.score / attempt.total_questions for attempt in attempts) * 100
+        recent_attempts = attempts[-5:] if len(attempts) >= 5 else attempts
+    else:
+        avg_score = 0
+        best_score = 0
+        recent_attempts = []
+    
+    stats = {
+        'total_attempts': total_attempts,
+        'avg_score': round(avg_score, 2),
+        'best_score': round(best_score, 2),
+        'recent_attempts': recent_attempts
+    }
+    
+    return render_template('analytics.html', 
+                         attempts=attempts, 
+                         chart_data=chart_data, 
+                         stats=stats,
+                         user_quizzes=user_quizzes,
+                         selected_quiz_id=selected_quiz_id,
+                         filter_title=filter_title)
 
 @app.route('/settings')
 @login_required

@@ -128,10 +128,10 @@
                                            border-radius: 50px; 
                                            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
                                            transition: all 0.3s ease;
-                                           min-width: 200px;"
+                                           min-width: 200px;
+                                           white-space: nowrap;"
                                 >
-                                    <i class="bi bi-magic me-2"></i>
-                                    Generate Questions
+                                    <i class="bi bi-magic me-2"></i>Generate Questions
                                 </button>
                             </div>
                         </div>
@@ -176,7 +176,7 @@
                                             <button @click="openQuizModal(question.id)" 
                                                     :disabled="question.saving || question.saved"
                                                     class="btn btn-sm"
-                                                    :class="question.saved ? 'btn-success' : 'btn-outline-light''">
+                                                    :class="question.saved ? 'btn-success' : 'btn-outline-light'">
                                                 <i x-show="!question.saving && !question.saved" class="bi bi-plus-circle"></i>
                                                 <i x-show="question.saving" class="bi bi-arrow-repeat spin"></i>
                                                 <i x-show="question.saved" class="bi bi-check-circle-fill"></i>
@@ -218,41 +218,53 @@
                         </div>
                     </div>
 
-                    <!-- Save to Quiz Modal -->
-                    <div x-show="showQuizModal" class="modal fade show" style="display: block;" @click.away="showQuizModal = false">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Save to Quiz</h5>
-                                    <button type="button" class="btn-close" @click="showQuizModal = false"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p>Select a quiz to save this question to:</p>
-                                    <ul class="list-group">
-                                        <template x-for="quiz in quizzes" :key="quiz.id">
-                                            <li class="list-group-item list-group-item-action" @click="saveQuestion(quiz.id)" x-text="quiz.title"></li>
-                                        </template>
-                                    </ul>
-                                    <hr>
-                                    <p>Or create a new quiz:</p>
-                                    <form @submit.prevent="">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="New quiz name" x-ref="newQuizName">
-                                            <button class="btn btn-primary" @click="
-                                                fetch('/create-quiz', {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'Content-Type': 'application/x-www-form-urlencoded',
-                                                    },
-                                                    body: new URLSearchParams({ title: $refs.newQuizName.value })
-                                                }).then(() => {
-                                                    fetchQuizzes();
-                                                    $refs.newQuizName.value = '';
-                                                })
-                                            ">Create & Save</button>
-                                        </div>
-                                    </form>
-                                </div>
+                    <!-- Custom Save to Quiz Modal -->
+                    <div x-show="showQuizModal" 
+                        class="custom-modal"
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+                        @click.self="closeQuizModal()">
+                         <div class="custom-modal-content" style="background-color: oklch(20% 0.025 329.708); color: oklch(71.996% 0.123 62.756deg); border: 1px solid oklch(25% 0.03 329.708);">
+                             <div class="custom-modal-header" style="border-bottom: 1px solid oklch(25% 0.03 329.708);">
+                                 <h5 class="custom-modal-title">Save to Quiz</h5>
+                                 <button type="button" class="custom-modal-close" @click="closeQuizModal()" style="color: oklch(71.996% 0.123 62.756deg);">&times;</button>
+                             </div>
+                             <div class="custom-modal-body">
+                                <p class="mb-3">Select a quiz to save this question to:</p>
+                                 <div class="list-group mb-3">
+                                     <template x-for="quiz in quizzes" :key="quiz.id">
+                                         <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" 
+                                             @click="saveQuestion(quiz.id)"
+                                             style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg); cursor: pointer;">
+                                             <span x-text="quiz.title"></span>
+                                             <small class="text-muted" x-text="quiz.question_count + ' questions'"></small>
+                                         </div>
+                                     </template>
+                                     <div x-show="!quizzes || quizzes.length === 0" class="list-group-item text-muted" style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708);">
+                                         No quizzes available
+                                     </div>
+                                 </div>
+                                
+                                <hr class="my-3">
+                                
+                                <p class="mb-3">Or create a new quiz:</p>
+                                 <form @submit.prevent="createAndSaveToNewQuiz()">
+                                     <div class="input-group">
+                                         <input type="text" 
+                                             class="form-control" 
+                                             placeholder="Enter new quiz name" 
+                                             x-model="newQuizName"
+                                             required
+                                             style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg);">
+                                         <button class="btn btn-primary" type="submit" :disabled="!newQuizName || !newQuizName.trim()" style="background-color: oklch(34.465% 0.029 199.194); border-color: oklch(34.465% 0.029 199.194);">
+                                             Create & Save
+                                         </button>
+                                     </div>
+                                 </form>
                             </div>
                         </div>
                     </div>

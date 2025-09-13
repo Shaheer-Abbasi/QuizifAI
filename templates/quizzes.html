@@ -54,7 +54,7 @@
         <div class="col p-3 p-md-5">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="mb-0">My Quizzes</h1>
-                <button class="btn gen-btn-modern px-2 py-2 text-muted" data-bs-toggle="modal" data-bs-target="#createQuizModal">
+                <button class="btn gen-btn-modern px-2 py-2 text-muted" data-modal-target="createQuizModal" onclick="const modal = document.getElementById('createQuizModal'); if(modal) { modal.style.display='block'; document.body.style.overflow='hidden'; } else { console.error('Modal not found'); }">
                     <i class="bi bi-plus-circle me-2"></i>
                     Create New Quiz
                 </button>
@@ -116,10 +116,6 @@
                                         <i class="bi bi-play-circle me-2"></i>
                                         Start Quiz
                                     </a>
-                                    <button class="btn btn-outline-danger" 
-                                            onclick="confirmDeleteQuiz({{ quiz.id }}, '{{ quiz.title }}')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -145,62 +141,180 @@
     </div>
 </div>
 
+<!-- Custom Create Quiz Modal -->
+<div id="createQuizModal" class="create-quiz-modal" x-data="{ newQuizTitle: '', showModal: false }">
+    <div class="custom-modal-content">
+        <div class="custom-modal-header">
+            <h5 class="custom-modal-title">Create New Quiz</h5>
+            <button type="button" class="custom-modal-close" @click="showModal = false; newQuizTitle = ''">&times;</button>
+        </div>
+        <form @submit.prevent="
+            if (newQuizTitle && newQuizTitle.trim()) {
+                fetch('/create-quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ title: newQuizTitle.trim() })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showModal = false;
+                        newQuizTitle = '';
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error creating quiz');
+                });
+            }
+        ">
+            <div class="custom-modal-body">
+                <div class="mb-3">
+                    <label for="quizTitle" class="form-label">Quiz Title</label>
+                    <input type="text" class="form-control" id="quizTitle" x-model="newQuizTitle" required
+                           style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg);">
+                </div>
+            </div>
+            <div class="custom-modal-footer">
+                <button type="button" class="btn btn-outline-light" @click="showModal = false; newQuizTitle = ''">Cancel</button>
+                <button type="submit" class="btn gen-btn-modern text-muted" :disabled="!newQuizTitle || !newQuizTitle.trim()">Create Quiz</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 {% endblock %}
 
-<!-- Create Quiz Modal -->
-<div class="modal fade" id="createQuizModal" tabindex="-1" aria-labelledby="createQuizModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content" style="background-color: oklch(20% 0.025 329.708); color: oklch(71.996% 0.123 62.756deg);">
-            <div class="modal-header border-bottom" style="border-color: oklch(25% 0.03 329.708) !important;">
-                <h5 class="modal-title" id="createQuizModalLabel">Create New Quiz</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="createQuizForm" action="{{ url_for('create_quiz') }}" method="POST">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="quizTitle" class="form-label">Quiz Title</label>
-                        <input type="text" class="form-control" id="quizTitle" name="title" required
-                               style="background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg);">
-                    </div>
-                </div>
-                <div class="modal-footer border-top" style="border-color: oklch(25% 0.03 329.708) !important;">
-                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn gen-btn-modern text-muted">Create Quiz</button>
-                </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Simple modal control functions - make globally accessible
+    window.openCreateQuizModal = function() {
+        const modal = document.getElementById('createQuizModal');
+        if (modal) {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            // Set showModal to true for Alpine.js
+            const alpineData = Alpine.$data(modal);
+            if (alpineData) {
+                alpineData.showModal = true;
+            }
+        }
+    };
+
+    // Make functions globally accessible
+    window.confirmDeleteQuiz = function(quizId, quizTitle) {
+        console.log('confirmDeleteQuiz called with:', quizId, quizTitle);
+        document.getElementById('deleteQuizName').textContent = quizTitle;
+        document.getElementById('deleteQuizForm').action = `/delete-quiz/${quizId}`;
+        
+        const modal = document.getElementById('deleteQuizModal');
+        if (modal) {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+    };
+
+    // Debug: Check if functions are defined
+    console.log('Functions defined:', {
+        openCreateQuizModal: typeof window.openCreateQuizModal,
+        confirmDeleteQuiz: typeof window.confirmDeleteQuiz
+    });
+});
+</script>
+
+<!-- Custom Delete Quiz Modal -->
+<div id="deleteQuizModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <div class="custom-modal-header">
+            <h5 class="custom-modal-title">Confirm Deletion</h5>
+            <button type="button" class="custom-modal-close" data-modal-close="deleteQuizModal">&times;</button>
+        </div>
+        <div class="custom-modal-body">
+            <p>Are you sure you want to delete the quiz "<span id="deleteQuizName"></span>"?</p>
+            <p class="text-danger">This action cannot be undone.</p>
+        </div>
+        <div class="custom-modal-footer">
+            <button type="button" class="btn btn-outline-light" data-modal-close="deleteQuizModal">Cancel</button>
+            <form id="deleteQuizForm" method="POST" style="display: inline;">
+                <button type="submit" class="btn btn-danger">Delete Quiz</button>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Delete Quiz Modal -->
-<div class="modal fade" id="deleteQuizModal" tabindex="-1" aria-labelledby="deleteQuizModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content" style="background-color: oklch(20% 0.025 329.708); color: oklch(71.996% 0.123 62.756deg);">
-            <div class="modal-header border-bottom" style="border-color: oklch(25% 0.03 329.708) !important;">
-                <h5 class="modal-title" id="deleteQuizModalLabel">Confirm Deletion</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete the quiz "<span id="deleteQuizName"></span>"?</p>
-                <p class="text-danger">This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer border-top" style="border-color: oklch(25% 0.03 329.708) !important;">
-                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                <form id="deleteQuizForm" method="POST">
-                    <button type="submit" class="btn btn-danger">Delete Quiz</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-    function confirmDeleteQuiz(quizId, quizTitle) {
-        document.getElementById('deleteQuizName').textContent = quizTitle;
-        document.getElementById('deleteQuizForm').action = `/delete-quiz/${quizId}`;
+    // Modal functionality with debugging
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, setting up modal handlers');
         
-        // Show the modal
-        var deleteModal = new bootstrap.Modal(document.getElementById('deleteQuizModal'));
-        deleteModal.show();
-    }
+        // Check if elements exist
+        const createButton = document.querySelector('[data-modal-target="createQuizModal"]');
+        const createModal = document.getElementById('createQuizModal');
+        console.log('Create button:', createButton);
+        console.log('Create modal:', createModal);
+        
+        // Open modal when clicking buttons with data-modal-target
+        document.addEventListener('click', function(event) {
+            console.log('Click event:', event.target);
+            
+            // Check if clicked element or its parent has data-modal-target
+            const targetButton = event.target.closest('[data-modal-target]');
+            if (targetButton) {
+                console.log('Found target button:', targetButton);
+                const modalId = targetButton.getAttribute('data-modal-target');
+                console.log('Modal ID:', modalId);
+                const modal = document.getElementById(modalId);
+                console.log('Modal element:', modal);
+                
+                if (modal) {
+                    console.log('Opening modal');
+                    modal.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    console.error('Modal not found:', modalId);
+                }
+            }
+        });
+        
+        // Close modal when clicking close buttons or cancel buttons
+        document.addEventListener('click', function(event) {
+            const closeButton = event.target.closest('[data-modal-close]');
+            if (closeButton) {
+                const modalId = closeButton.getAttribute('data-modal-close');
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    // Clear form if it's the create quiz modal
+                    if (modalId === 'createQuizModal') {
+                        const form = document.getElementById('createQuizForm');
+                        if (form) form.reset();
+                    }
+                }
+            }
+        });
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('custom-modal')) {
+                event.target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const openModals = document.querySelectorAll('.custom-modal[style*="block"]');
+                openModals.forEach(modal => {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                });
+            }
+        });
+        
+    });
 </script>
