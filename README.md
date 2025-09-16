@@ -1,4 +1,4 @@
-# QuizifAI
+# QuizifAI (Beta)
 
 A modern, AI-powered quiz generation and management platform built with Flask and Google's Gemini AI. Transform your study materials into interactive quizzes with beautiful analytics and progress tracking.
 
