@@ -29,4 +29,5 @@ RUN pip3 install -r requirements.txt
 COPY . .
 
 # Command to run the application
+# Updated: 2025-09-17 - Fixed Tesseract installation
 CMD ["gunicorn", "app:app"]
