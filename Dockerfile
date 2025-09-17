@@ -1,6 +1,23 @@
 # Use the official Python runtime as the base image
 FROM python:3.9-slim-buster
 
+# Update package list
+RUN apt-get update && echo "=== APT UPDATE COMPLETED ==="
+
+# Install tesseract-ocr
+RUN apt-get install -y tesseract-ocr && echo "=== TESSERACT-OCR INSTALLED ==="
+
+# Install development libraries
+RUN apt-get install -y libtesseract-dev && echo "=== LIBTESSERACT-DEV INSTALLED ==="
+
+# Verify installation
+RUN which tesseract && echo "=== TESSERACT LOCATION FOUND ==="
+RUN tesseract --version && echo "=== TESSERACT VERSION CHECK PASSED ==="
+
+# Clean up
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* && echo "=== BUILD CLEANUP COMPLETED ==="l Python runtime as the base image
+FROM python:3.9-slim-buster
+
 # Install system dependencies including tesseract
 RUN apt-get update && \
     echo "=== APT UPDATE COMPLETED ===" && \
