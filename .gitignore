@@ -17,6 +17,9 @@ instance/
 .DS_Store
 Thumbs.db
 
+# Test files
+test_tesseract.py
+
 # Application specific - uncomment if you don't want to track uploaded files
 # static/files/*.pdf
 # static/files/*.png

@@ -109,13 +109,50 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Configure tesseract if available
 if TESSERACT_AVAILABLE:
-    # Try to find tesseract in common locations
     import shutil
-    tesseract_path = shutil.which('tesseract')
+    import platform
+    
+    # First try to get tesseract path from environment variable
+    tesseract_path = os.getenv('TESSERACT_PATH')
+    
+    if not tesseract_path:
+        # Try to find tesseract automatically
+        tesseract_path = shutil.which('tesseract')
+    
+    if not tesseract_path and platform.system() == 'Windows':
+        # Try common Windows installation paths
+        common_paths = [
+            r'C:\Program Files\Tesseract-OCR\tesseract.exe',
+            r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe',
+            r'C:\Users\{}\AppData\Local\Tesseract-OCR\tesseract.exe'.format(os.getenv('USERNAME', '')),
+            r'C:\tools\tesseract\tesseract.exe'  # Chocolatey path
+        ]
+        for path in common_paths:
+            if os.path.isfile(path):
+                tesseract_path = path
+                break
+    elif not tesseract_path and platform.system() in ['Linux', 'Darwin']:
+        # Try common Linux/macOS installation paths
+        common_paths = [
+            '/usr/bin/tesseract',
+            '/usr/local/bin/tesseract',
+            '/opt/homebrew/bin/tesseract'  # Homebrew on Apple Silicon
+        ]
+        for path in common_paths:
+            if os.path.isfile(path):
+                tesseract_path = path
+                break
+    
     if tesseract_path:
         pytesseract.pytesseract.tesseract_cmd = tesseract_path
+        logging.info(f"Tesseract configured at: {tesseract_path}")
+    else:
+        logging.warning("Tesseract executable not found - image text extraction will not be available")
+        # Update the global variable
+        globals()['TESSERACT_AVAILABLE'] = False
 
 def extract_text_from_pdf(pdf_path):
+    print(f"In the PDF extraction function")
     print(f"Extracting text from PDF: {pdf_path}")
     try:
         reader = PdfReader(pdf_path)
@@ -131,15 +168,18 @@ def extract_text_from_image(image_path):
     print(f"Extracting text from image: {image_path}")
     if not TESSERACT_AVAILABLE:
         logging.warning("Tesseract not available - cannot extract text from images")
-        return "Image text extraction not available in this deployment. Please use PDF files or copy/paste text directly."
+        raise Exception("Image text extraction not available in this deployment. Please use PDF files or copy/paste text directly.")
     
     try:
         image = Image.open(image_path)
         text = pytesseract.image_to_string(image)
-        return text.strip()
+        extracted_text = text.strip()
+        if not extracted_text:
+            raise Exception("No text could be extracted from the image. Please ensure the image contains readable text or try a different image.")
+        return extracted_text
     except Exception as e:
         logging.error(f"Error extracting text from image: {e}")
-        return None
+        raise e
 
 # ============ AUTHENTICATION ROUTES ============
 
@@ -410,7 +450,10 @@ def generate_questions():
                 filename = secure_filename(file.filename)
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
-                user_input = extract_text_from_image(file_path)
+                try:
+                    user_input = extract_text_from_image(file_path)
+                except Exception as e:
+                    return jsonify({"status": "error", "message": str(e)}), 400
             else:
                 return jsonify({"status": "error", "message": "Unsupported file type"}), 400
     else:
