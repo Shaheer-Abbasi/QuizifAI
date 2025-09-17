@@ -115,55 +115,20 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 # Configure tesseract if available
 if TESSERACT_AVAILABLE:
     import shutil
-    import platform
     
-    print(f"DEBUG: Platform detected: {platform.system()}")
     print(f"DEBUG: TESSERACT_AVAILABLE: {TESSERACT_AVAILABLE}")
-    print(f"DEBUG: Current PATH: {os.environ.get('PATH', 'Not set')}")
     
-    # First try to get tesseract path from environment variable
-    tesseract_path = os.getenv('TESSERACT_PATH')
-    print(f"DEBUG: TESSERACT_PATH env var: {tesseract_path}")
-    
-    if not tesseract_path:
-        # Try to find tesseract automatically
-        tesseract_path = shutil.which('tesseract')
-        print(f"DEBUG: shutil.which('tesseract'): {tesseract_path}")
-        
-        if not tesseract_path:
-            # Try all common installation paths (Linux, macOS, Windows)
-            common_paths = [
-                '/usr/bin/tesseract',           # Most Linux distributions
-                '/usr/local/bin/tesseract',     # Manual installs on Linux/macOS
-                '/opt/homebrew/bin/tesseract',  # Homebrew on Apple Silicon
-                '/bin/tesseract',               # Some minimal containers
-                '/usr/local/bin/tesseract',     # Some Docker containers
-                r'C:\Program Files\Tesseract-OCR\tesseract.exe',  # Windows default
-                r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe',  # Windows x86
-                r'C:\tools\tesseract\tesseract.exe'  # Chocolatey on Windows
-            ]
-            
-            for path in common_paths:
-                print(f"DEBUG: Checking path: {path} - exists: {os.path.isfile(path)}")
-                if os.path.isfile(path):
-                    tesseract_path = path
-                    print(f"DEBUG: Found tesseract at: {path}")
-                    break
-    
-    # Validate the path if we found one
-    if tesseract_path and not os.path.isfile(tesseract_path):
-        print(f"DEBUG: Path exists but not accessible: {tesseract_path}")
-        tesseract_path = None
+    # Try to find tesseract automatically (should work with default installation)
+    tesseract_path = shutil.which('tesseract')
+    print(f"DEBUG: shutil.which('tesseract'): {tesseract_path}")
     
     if tesseract_path:
-        pytesseract.pytesseract.tesseract_cmd = tesseract_path
-        print(f"DEBUG: Successfully configured tesseract at: {tesseract_path}")
+        print(f"DEBUG: Successfully found tesseract at: {tesseract_path}")
         logging.info(f"Tesseract configured at: {tesseract_path}")
     else:
-        print(f"DEBUG: No tesseract path found - disabling image text extraction")
+        print(f"DEBUG: No tesseract found in PATH - disabling image text extraction")
         logging.warning("Tesseract executable not found - image text extraction will not be available")
-        # Update the global variable
-        globals()['TESSERACT_AVAILABLE'] = False
+        TESSERACT_AVAILABLE = False
 
 print(f"DEBUG: Final TESSERACT_AVAILABLE status: {TESSERACT_AVAILABLE}")
 if TESSERACT_AVAILABLE:
