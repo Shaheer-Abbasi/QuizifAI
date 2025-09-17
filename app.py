@@ -108,7 +108,12 @@ with app.app_context():
     db.create_all()
 
 # AI Client setup
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+api_key = os.getenv("GEMINI_API_KEY")
+if not api_key:
+    print("WARNING: GEMINI_API_KEY not found in environment variables")
+else:
+    print(f"DEBUG: GEMINI_API_KEY configured (length: {len(api_key)})")
+genai.configure(api_key=api_key)
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -431,35 +436,47 @@ def settings():
 
 @app.route('/generate-questions', methods=['POST'])
 def generate_questions():
-    # Question generation API (works for both guest and authenticated users)
-    user_input = None
-    
-    if 'file' in request.files:
-        file = request.files['file']
-        if file.filename != '':
-            file_ext = file.filename.split('.')[1].lower()
-            if file_ext == 'pdf':
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
-                user_input = extract_text_from_pdf(file_path)
-            elif file_ext in ['png', 'jpg', 'jpeg']:
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(file_path)
-                try:
-                    user_input = extract_text_from_image(file_path)
-                except Exception as e:
-                    return jsonify({"status": "error", "message": str(e)}), 400
-            else:
-                return jsonify({"status": "error", "message": "Unsupported file type"}), 400
-    else:
-        user_input = request.form.get("study_material")
-
-    if not user_input:
-        return jsonify({"status": "error", "message": "No input provided"}), 400
-
     try:
+        print("DEBUG: Starting generate_questions route")
+        # Question generation API (works for both guest and authenticated users)
+        user_input = None
+        
+        if 'file' in request.files:
+            print("DEBUG: File upload detected")
+            file = request.files['file']
+            if file.filename != '':
+                file_ext = file.filename.split('.')[1].lower()
+                print(f"DEBUG: File extension: {file_ext}")
+                if file_ext == 'pdf':
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                    print(f"DEBUG: Extracting text from PDF: {file_path}")
+                    user_input = extract_text_from_pdf(file_path)
+                elif file_ext in ['png', 'jpg', 'jpeg']:
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                    print(f"DEBUG: Extracting text from image: {file_path}")
+                    try:
+                        user_input = extract_text_from_image(file_path)
+                        print(f"DEBUG: Extracted text length: {len(user_input) if user_input else 0}")
+                    except Exception as e:
+                        print(f"DEBUG: Image text extraction failed: {e}")
+                        return jsonify({"status": "error", "message": str(e)}), 400
+                else:
+                    print(f"DEBUG: Unsupported file type: {file_ext}")
+                    return jsonify({"status": "error", "message": "Unsupported file type"}), 400
+        else:
+            print("DEBUG: No file upload, checking form data")
+            user_input = request.form.get("study_material")
+            print(f"DEBUG: Form data length: {len(user_input) if user_input else 0}")
+
+        if not user_input:
+            print("DEBUG: No input provided")
+            return jsonify({"status": "error", "message": "No input provided"}), 400
+
+        print("DEBUG: Calling Gemini AI")
         model = genai.GenerativeModel("gemini-1.5-flash")
         response = model.generate_content("""Create quiz questions from the study material below. Follow these EXACT formatting rules:
 
@@ -479,12 +496,17 @@ def generate_questions():
                 STUDY MATERIAL:
                 """ + user_input)
         
+        print("DEBUG: AI response received")
         ai_response = response.text if response and hasattr(response, 'text') else "No response from AI"
+        print(f"DEBUG: Returning success response")
         return jsonify({"status": "success", "ai_response": ai_response})
         
     except Exception as e:
+        print(f"DEBUG: Exception in generate_questions: {e}")
+        import traceback
+        traceback.print_exc()
         logging.error(f"Error generating questions: {e}")
-        return jsonify({"status": "error", "message": f"Failed to generate questions: {e}"}), 500
+        return jsonify({"status": "error", "message": f"Failed to generate questions: {str(e)}"}), 500
 
 @app.route('/save-question', methods=['POST'])
 @login_required
