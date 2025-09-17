@@ -1,0 +1,28 @@
+# Use the official Python runtime as the base image
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies including tesseract
+RUN apt-get update && \
+    apt-get install -y \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the application code
+COPY . .
+
+# Create uploads directory
+RUN mkdir -p static/files
+
+# Expose the port that the app runs on
+EXPOSE 5000
+
+# Command to run the application
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
