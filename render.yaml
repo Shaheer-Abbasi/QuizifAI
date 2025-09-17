@@ -8,3 +8,5 @@ services:
         generateValue: true
       - key: GEMINI_API_KEY
         sync: false
+      - key: TESSERACT_PATH
+        value: "/usr/bin/tesseract"

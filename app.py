@@ -112,12 +112,17 @@ if TESSERACT_AVAILABLE:
     import shutil
     import platform
     
+    print(f"DEBUG: Platform detected: {platform.system()}")
+    print(f"DEBUG: TESSERACT_AVAILABLE: {TESSERACT_AVAILABLE}")
+    
     # First try to get tesseract path from environment variable
     tesseract_path = os.getenv('TESSERACT_PATH')
+    print(f"DEBUG: TESSERACT_PATH env var: {tesseract_path}")
     
     if not tesseract_path:
         # Try to find tesseract automatically
         tesseract_path = shutil.which('tesseract')
+        print(f"DEBUG: shutil.which('tesseract'): {tesseract_path}")
     
     if not tesseract_path and platform.system() == 'Windows':
         # Try common Windows installation paths
@@ -130,6 +135,7 @@ if TESSERACT_AVAILABLE:
         for path in common_paths:
             if os.path.isfile(path):
                 tesseract_path = path
+                print(f"DEBUG: Found tesseract at Windows path: {path}")
                 break
     elif not tesseract_path and platform.system() in ['Linux', 'Darwin']:
         # Try common Linux/macOS installation paths
@@ -139,17 +145,25 @@ if TESSERACT_AVAILABLE:
             '/opt/homebrew/bin/tesseract'  # Homebrew on Apple Silicon
         ]
         for path in common_paths:
+            print(f"DEBUG: Checking Linux path: {path} - exists: {os.path.isfile(path)}")
             if os.path.isfile(path):
                 tesseract_path = path
+                print(f"DEBUG: Found tesseract at Linux path: {path}")
                 break
     
     if tesseract_path:
         pytesseract.pytesseract.tesseract_cmd = tesseract_path
+        print(f"DEBUG: Successfully configured tesseract at: {tesseract_path}")
         logging.info(f"Tesseract configured at: {tesseract_path}")
     else:
+        print(f"DEBUG: No tesseract path found - disabling image text extraction")
         logging.warning("Tesseract executable not found - image text extraction will not be available")
         # Update the global variable
         globals()['TESSERACT_AVAILABLE'] = False
+
+print(f"DEBUG: Final TESSERACT_AVAILABLE status: {TESSERACT_AVAILABLE}")
+if TESSERACT_AVAILABLE:
+    print(f"DEBUG: Final tesseract command: {pytesseract.pytesseract.tesseract_cmd}")
 
 def extract_text_from_pdf(pdf_path):
     print(f"In the PDF extraction function")

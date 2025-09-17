@@ -11,6 +11,10 @@ RUN apt-get update && \
     tesseract-ocr-eng \
     && rm -rf /var/lib/apt/lists/*
 
+# Verify tesseract installation and set environment variable
+RUN which tesseract && tesseract --version
+ENV TESSERACT_PATH="/usr/bin/tesseract"
+
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
