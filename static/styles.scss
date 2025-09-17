@@ -60,6 +60,11 @@ body{
     border: none !important;
 }
 
+.gen-btn-color:hover{
+    background-color: $accent-color !important;
+    color: $primary-color !important;
+}
+
 .upload-btn-color{
     background-color: $info-color !important;
     color: $neutral-color !important;
@@ -71,6 +76,24 @@ body{
 }
 
 .q-bank-color{
-    background-color: $base-color !important;
+    background-color: $base-color;
     height: 50%;
+    overflow: hidden !important;
+    overflow-x: auto !important;
+    white-space: nowrap;
+    flex-wrap: nowrap;
+    width: 100% !important;
+}
+
+.quiz-card-custom{
+    background-color: oklch(16% 0.019 329.708) !important; 
+    min-width: 350px !important; 
+    max-width: 350px !important; 
+    flex-shrink: 0 !important; 
+    overflow: hidden !important; 
+}
+
+.card-custom{
+    background-color: $accent-color !important;
+    color: $primary-color !important;
 }

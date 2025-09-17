@@ -1,2 +1,24 @@
 .venv
 .env
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Instance folder
+instance/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Application specific - uncomment if you don't want to track uploaded files
+# static/files/*.pdf
+# static/files/*.png
+# static/files/*.jpg
+# static/files/*.jpeg

@@ -14,7 +14,47 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Leckerli+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Leckerli+One&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+    <!-- Quiz Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/quiz.css') }}">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Alpine cloak to prevent flash of unstyled content */
+        [x-cloak] { display: none !important; }
+        
+        /* Animation for quiz taking */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .selected-answer div {
+            background-color: oklch(25% 0.03 329.708) !important;
+            border: 2px solid oklch(71.996% 0.123 62.756deg) !important;
+        }
+        
+        .correct-answer div {
+            background-color: oklch(22% 0.025 131.116deg) !important;
+            border: 2px solid oklch(74.722% 0.072 131.116deg) !important;
+        }
+        
+        .incorrect-answer div {
+            background-color: oklch(22% 0.025 31.871deg) !important;
+            border: 2px solid oklch(77.318% 0.128 31.871deg) !important;
+        }
+        
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
     <title>QuizifAI</title>
 </head>
 <body>
@@ -28,26 +68,15 @@
         crossorigin="anonymous">
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            var $studyForm = $("#study-form");
-            if ($studyForm.length) {
-                $studyForm.submit(function(e) {
-                    e.preventDefault();
-                    $.ajax({
-                        type: 'POST',
-                        url: "/",
-                        data: $(this).serialize(),
-                        dataType: 'json',
-                        success: function(response) {
-                            console.log("Server recieved: ", response);
-                        },
-                        error: function(xhr) {
-                            console.error("Error occurred: ", xhr.responseText);
-                        }
-                    });
-                });
-            }
-        });
-    </script>
+    
+    <!-- Page-specific scripts -->
+    {% set current_page = request.endpoint %}
+    {% if current_page == 'take_quiz' %}
+    <script src="{{ url_for('static', filename='take_quiz.js') }}"></script>
+    {% elif current_page == 'home' %}
+    <script src="{{ url_for('static', filename='home.js', v='1.1') }}"></script>
+    {% elif current_page == 'index' %}
+    <script src="{{ url_for('static', filename='guest.js', v='1.1') }}"></script>
+    {% endif %}
+</body>
 </html>

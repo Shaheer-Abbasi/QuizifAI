@@ -1,0 +1,124 @@
+/* Quiz styling */
+.answer-option {
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.answer-option div {
+    border: 1px solid #343a40;
+    border-radius: 8px;
+    padding: 12px 16px;
+    background-color: #212529;
+    color: #f8f9fa;
+    transition: all 0.2s ease-in-out;
+}
+
+.answer-option:hover div {
+    background-color: #343a40;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-container {
+    max-width: 800px;
+    margin: 0 auto;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.question-number {
+    font-size: 0.9rem;
+    color: #adb5bd;
+    margin-bottom: 5px;
+}
+
+.question-text {
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+    font-weight: 500;
+    color: #f8f9fa;
+}
+
+.quiz-result {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #212529;
+    color: #f8f9fa;
+    margin-top: 20px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.quiz-score {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.quiz-feedback {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+/* Navigation buttons */
+.quiz-nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.quiz-nav-btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.quiz-nav-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Quiz progress indicator */
+.quiz-progress {
+    height: 6px;
+    border-radius: 3px;
+    margin-bottom: 20px;
+    background-color: #343a40;
+    overflow: hidden;
+}
+
+.quiz-progress-bar {
+    height: 100%;
+    background-color: oklch(53.18% 0.123 62.76deg);
+    transition: width 0.3s ease;
+}
+
+.selected-answer div {
+    background-color: #0d6efd !important;
+    border-color: #0d6efd !important;
+}
+
+.correct-answer div {
+    background-color: #198754 !important;
+    border-color: #198754 !important;
+}
+
+.incorrect-answer div {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .quiz-container {
+        padding: 0 15px;
+    }
+    
+    .question-text {
+        font-size: 1.1rem;
+    }
+    
+    .answer-option div {
+        padding: 10px 12px;
+    }
+}

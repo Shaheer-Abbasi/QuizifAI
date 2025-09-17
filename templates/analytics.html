@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div id="sb" class="col-auto col-md-2 col-xl-1 px-sm-2 px-0 sidebar-custom" >
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 min-vh-100">
+                <a href="{{ url_for('home') }}" id="main-logo" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-decoration-none fs-leckerli-one">
+                    <span class="fs-5 d-none d-sm-inline">QuizifAI</span>
+                </a>
+                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start flex-grow-1">
+                    <li class="nav-item">
+                        <a href="{{ url_for('home') }}" class="nav-link align-middle px-0">
+                            <i class="bi bi-house-door"></i>
+                            <span class="ms-1 d-none d-sm-inline">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('quizzes') }}" class="nav-link px-0 align-middle">
+                            <i class="bi bi-pencil-square"></i>
+                            <span class="ms-1 d-none d-sm-inline">Quizzes</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('analytics') }}" class="nav-link px-0 align-middle active">
+                            <i class="bi bi-graph-up-arrow"></i>
+                            <span class="ms-1 d-none d-sm-inline">Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('settings') }}" class="nav-link px-0 align-middle">
+                            <i class="bi bi-gear"></i>
+                            <span class="ms-1 d-none d-sm-inline">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- User Info and Logout at Bottom -->
+                <div class="w-100 mt-auto mb-3">
+                    <div class="text-center mb-2">
+                        <small class="text-decoration">Welcome, {{ current_user.username }}!</small>
+                    </div>
+                    <div class="d-grid">
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm" style="border-radius: 20px; font-size: 0.85rem;">
+                            <i class="bi bi-box-arrow-right me-1"></i>
+                            <span class="d-none d-sm-inline">Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col p-3 p-md-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="mb-0">Performance Analytics</h1>
+                
+                <!-- Quiz Filter Dropdown -->
+                <div class="d-flex align-items-center">
+                    <label for="quizFilter" class="form-label me-2 mb-0">Filter by Quiz:</label>
+                    <select id="quizFilter" class="form-select" style="width: auto; min-width: 200px; background-color: oklch(22% 0.025 329.708); border: 1px solid oklch(30% 0.03 329.708); color: oklch(80% 0.1 62.756deg);" onchange="filterQuiz()">
+                        <option value="" {% if not selected_quiz_id %}selected{% endif %}>All Quizzes</option>
+                        {% for quiz in user_quizzes %}
+                            <option value="{{ quiz.id }}" {% if selected_quiz_id == quiz.id %}selected{% endif %}>
+                                {{ quiz.title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Current Filter Display -->
+            <div class="mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-funnel me-2 text-info"></i>
+                    <span class="text-muted">Showing analytics for: </span>
+                    <strong class="ms-1 text-info">{{ filter_title }}</strong>
+                    {% if selected_quiz_id %}
+                        <a href="{{ url_for('analytics') }}" class="btn btn-outline-light btn-sm ms-3" style="font-size: 0.8rem;">
+                            <i class="bi bi-x-circle me-1"></i>Clear Filter
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if attempts %}
+                <!-- Overview Cards -->
+                <div class="row g-4 mb-5">
+                    <div class="col-md-3">
+                        <div class="p-4 rounded" style="background: linear-gradient(145deg, #1a1a1a, #181818); border: 1px solid #252526; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-clipboard-check me-2 text-primary" style="font-size: 1.5rem;"></i>
+                                <h5 class="mb-0">Total Attempts</h5>
+                            </div>
+                            <div class="d-flex align-items-end">
+                                <span class="display-4 me-2 text-primary">{{ stats.total_attempts }}</span>
+                                <span class="text-muted">quizzes taken</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-4 rounded" style="background: linear-gradient(145deg, #1a1a1a, #181818); border: 1px solid #252526; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-graph-up me-2 text-info" style="font-size: 1.5rem;"></i>
+                                <h5 class="mb-0">Average Score</h5>
+                            </div>
+                            <div class="d-flex align-items-end">
+                                <span class="display-4 me-2 text-info">{{ stats.avg_score }}%</span>
+                                <span class="text-muted">average</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-4 rounded" style="background: linear-gradient(145deg, #1a1a1a, #181818); border: 1px solid #252526; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-trophy me-2 text-warning" style="font-size: 1.5rem;"></i>
+                                <h5 class="mb-0">Best Score</h5>
+                            </div>
+                            <div class="d-flex align-items-end">
+                                <span class="display-4 me-2 text-warning">{{ stats.best_score }}%</span>
+                                <span class="text-muted">personal best</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-4 rounded" style="background: linear-gradient(145deg, #1a1a1a, #181818); border: 1px solid #252526; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-calendar-week me-2 text-success" style="font-size: 1.5rem;"></i>
+                                <h5 class="mb-0">Recent Activity</h5>
+                            </div>
+                            <div class="d-flex align-items-end">
+                                <span class="display-4 me-2 text-success">{{ stats.recent_attempts|length }}</span>
+                                <span class="text-muted">last 5 attempts</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Chart -->
+                <div class="mb-5 p-4 rounded" style="background: linear-gradient(145deg, #1a1a1a, #181818); border: 1px solid #252526; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                    <div class="d-flex align-items-center mb-4">
+                        <i class="bi bi-graph-up-arrow me-2 text-primary" style="font-size: 1.5rem;"></i>
+                        <h3 class="mb-0">Progress Over Time</h3>
+                        {% if selected_quiz_id %}
+                            <span class="badge bg-info ms-2">{{ filter_title }}</span>
+                        {% endif %}
+                    </div>
+                    <!-- Hidden element to store chart data -->
+                    <div id="chart-data" style="display: none;">
+                        {{ chart_data|tojson }}
+                    </div>
+                    <div style="height: 400px; position: relative;">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Quiz Performance Breakdown -->
+                <div class="mb-5 p-4 rounded" style="background: linear-gradient(145deg, #1a1a1a, #181818); border: 1px solid #252526; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);">
+                    <div class="d-flex align-items-center mb-4">
+                        <i class="bi bi-pie-chart me-2 text-success" style="font-size: 1.5rem;"></i>
+                        <h3 class="mb-0">Quiz Performance Distribution</h3>
+                        {% if selected_quiz_id %}
+                            <span class="badge bg-info ms-2">{{ filter_title }}</span>
+                        {% endif %}
+                    </div>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <h3 class="mb-4">Recent Quiz Attempts</h3>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Quiz</th>
+                                <th>Score</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in (attempts|sort(attribute='completed_at', reverse=True))[:10] %}
+                                <tr>
+                                    <td>{{ attempt.completed_at.strftime('%b %d, %Y') }}</td>
+                                    <td>{{ attempt.quiz.title }}</td>
+                                    <td>{{ attempt.score }} / {{ attempt.total_questions }}</td>
+                                    <td>
+                                        {% set percent = (attempt.score / attempt.total_questions) * 100 %}
+                                        <div class="progress" style="height: 10px; background-color: #252526;">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {{ percent }}%; background-color: #6ca0f5;" 
+                                                 aria-valuenow="{{ percent }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                        <small class="ms-2">{{ "%.1f"|format(percent) }}%</small>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Parse data from the hidden element
+                        const chartDataElement = document.getElementById('chart-data');
+                        const chartData = JSON.parse(chartDataElement.textContent);
+                        
+                        // Progress Over Time Chart
+                        const progressCtx = document.getElementById('progressChart').getContext('2d');
+                        
+                        // Prepare data for line chart
+                        const dates = chartData.map(item => item.date);
+                        const scores = chartData.map(item => item.score);
+                        const quizNames = chartData.map(item => item.quiz_name);
+                        const rawScores = chartData.map(item => item.raw_score);
+                        
+                        new Chart(progressCtx, {
+                            type: 'line',
+                            data: {
+                                labels: dates,
+                                datasets: [{
+                                    label: 'Score (%)',
+                                    data: scores,
+                                    borderColor: '#6ca0f5',
+                                    backgroundColor: 'rgba(108, 160, 245, 0.1)',
+                                    borderWidth: 3,
+                                    pointBackgroundColor: '#6ca0f5',
+                                    pointBorderColor: '#ffffff',
+                                    pointBorderWidth: 2,
+                                    pointRadius: 6,
+                                    pointHoverRadius: 8,
+                                    tension: 0.4,
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        titleColor: '#ffffff',
+                                        bodyColor: '#ffffff',
+                                        borderColor: '#6ca0f5',
+                                        borderWidth: 1,
+                                        callbacks: {
+                                            title: function(context) {
+                                                const index = context[0].dataIndex;
+                                                return `${quizNames[index]} - ${dates[index]}`;
+                                            },
+                                            label: function(context) {
+                                                const index = context.dataIndex;
+                                                return `Score: ${rawScores[index]} (${scores[index]}%)`;
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        max: 100,
+                                        title: {
+                                            display: true,
+                                            text: 'Score Percentage (%)',
+                                            color: 'rgba(255, 255, 255, 0.8)'
+                                        },
+                                        ticks: {
+                                            color: 'rgba(255, 255, 255, 0.7)',
+                                            callback: function(value) {
+                                                return value + '%';
+                                            }
+                                        },
+                                        grid: {
+                                            color: 'rgba(255, 255, 255, 0.1)'
+                                        }
+                                    },
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Date',
+                                            color: 'rgba(255, 255, 255, 0.8)'
+                                        },
+                                        ticks: {
+                                            color: 'rgba(255, 255, 255, 0.7)',
+                                            maxTicksLimit: 10
+                                        },
+                                        grid: {
+                                            color: 'rgba(255, 255, 255, 0.1)'
+                                        }
+                                    }
+                                },
+                                interaction: {
+                                    intersect: false,
+                                    mode: 'index'
+                                }
+                            }
+                        });
+
+                        // Performance Distribution Chart
+                        const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+                        
+                        // Calculate performance ranges
+                        const ranges = {
+                            'Excellent (90-100%)': 0,
+                            'Good (80-89%)': 0,
+                            'Average (70-79%)': 0,
+                            'Below Average (60-69%)': 0,
+                            'Poor (<60%)': 0
+                        };
+                        
+                        scores.forEach(score => {
+                            if (score >= 90) ranges['Excellent (90-100%)']++;
+                            else if (score >= 80) ranges['Good (80-89%)']++;
+                            else if (score >= 70) ranges['Average (70-79%)']++;
+                            else if (score >= 60) ranges['Below Average (60-69%)']++;
+                            else ranges['Poor (<60%)']++;
+                        });
+                        
+                        new Chart(performanceCtx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: Object.keys(ranges),
+                                datasets: [{
+                                    data: Object.values(ranges),
+                                    backgroundColor: [
+                                        '#28a745', // Excellent - Green
+                                        '#6ca0f5', // Good - Blue
+                                        '#ffc107', // Average - Yellow
+                                        '#fd7e14', // Below Average - Orange
+                                        '#dc3545'  // Poor - Red
+                                    ],
+                                    borderColor: '#1a1a1a',
+                                    borderWidth: 2,
+                                    hoverBorderWidth: 3
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        position: 'right',
+                                        labels: {
+                                            color: 'rgba(255, 255, 255, 0.8)',
+                                            padding: 20,
+                                            usePointStyle: true
+                                        }
+                                    },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        titleColor: '#ffffff',
+                                        bodyColor: '#ffffff',
+                                        borderColor: '#6ca0f5',
+                                        borderWidth: 1,
+                                        callbacks: {
+                                            label: function(context) {
+                                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                                return `${context.label}: ${context.parsed} attempts (${percentage}%)`;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    });
+                </script>
+                
+                <!-- Quiz Filter JavaScript -->
+                <script>
+                    function filterQuiz() {
+                        const select = document.getElementById('quizFilter');
+                        const selectedQuizId = select.value;
+                        
+                        // Build URL with quiz filter
+                        const url = new URL(window.location.href);
+                        url.search = ''; // Clear existing query params
+                        
+                        if (selectedQuizId) {
+                            url.searchParams.set('quiz_id', selectedQuizId);
+                        }
+                        
+                        // Redirect to filtered analytics page
+                        window.location.href = url.toString();
+                    }
+                </script>
+                
+            {% else %}
+                <div class="text-center py-5 my-5">
+                    <div class="mb-4">
+                        <i class="bi bi-bar-chart" style="font-size: 3rem; color: #6ca0f5;"></i>
+                    </div>
+                    {% if selected_quiz_id %}
+                        <h3>No Attempts for This Quiz</h3>
+                        <p class="text-muted">You haven't taken "{{ filter_title }}" yet. Take this quiz to see your analytics.</p>
+                        <div class="mt-3">
+                            <a href="{{ url_for('analytics') }}" class="btn btn-outline-light me-2">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                View All Analytics
+                            </a>
+                            <a href="{{ url_for('quizzes') }}" class="btn gen-btn-modern text-muted">
+                                <i class="bi bi-play-circle me-2"></i>
+                                Take Quiz
+                            </a>
+                        </div>
+                    {% else %}
+                        <h3>No Quiz Attempts Yet</h3>
+                        <p class="text-muted">Take quizzes to start tracking your progress and performance.</p>
+                        <a href="{{ url_for('quizzes') }}" class="btn gen-btn-modern mt-3 text-muted">
+                            <i class="bi bi-play-circle me-2"></i>
+                            Start a Quiz
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
