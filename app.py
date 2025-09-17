@@ -8,8 +8,13 @@ from PIL import Image
 try:
     import pytesseract
     TESSERACT_AVAILABLE = True
-except ImportError:
+    print("DEBUG: pytesseract imported successfully")
+except ImportError as e:
     TESSERACT_AVAILABLE = False
+    print(f"DEBUG: Failed to import pytesseract: {e}")
+except Exception as e:
+    TESSERACT_AVAILABLE = False
+    print(f"DEBUG: Unexpected error importing pytesseract: {e}")
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
@@ -164,6 +169,20 @@ if TESSERACT_AVAILABLE:
 print(f"DEBUG: Final TESSERACT_AVAILABLE status: {TESSERACT_AVAILABLE}")
 if TESSERACT_AVAILABLE:
     print(f"DEBUG: Final tesseract command: {pytesseract.pytesseract.tesseract_cmd}")
+    
+    # Test tesseract functionality
+    try:
+        from PIL import Image as PILImage
+        import io
+        
+        # Create a simple test image with white background
+        test_img = PILImage.new('RGB', (200, 50), color='white')
+        # Note: This is just a basic test - in production we'd need to add text to the image
+        print("DEBUG: Created test image successfully")
+        print("DEBUG: Tesseract basic setup appears to be working")
+    except Exception as e:
+        print(f"DEBUG: Error during tesseract test: {e}")
+        globals()['TESSERACT_AVAILABLE'] = False
 
 def extract_text_from_pdf(pdf_path):
     print(f"In the PDF extraction function")

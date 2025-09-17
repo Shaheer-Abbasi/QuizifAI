@@ -5,15 +5,15 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install system dependencies including tesseract
-RUN apt-get update && \
-    apt-get install -y \
-    tesseract-ocr \
-    tesseract-ocr-eng \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt update && apt install -y tesseract-ocr tesseract-ocr-eng
 
-# Verify tesseract installation and set environment variable
-RUN which tesseract && tesseract --version
-ENV TESSERACT_PATH="/usr/bin/tesseract"
+# Verify tesseract installation and create symbolic link if needed
+RUN which tesseract || ln -s /usr/bin/tesseract /usr/local/bin/tesseract
+RUN tesseract --version
+RUN ls -la /usr/bin/tesseract*
+
+# Set environment variable for tesseract
+ENV TESSERACT_CMD="/usr/bin/tesseract"
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
