@@ -120,14 +120,37 @@ if TESSERACT_AVAILABLE:
     print(f"DEBUG: Platform detected: {platform.system()}")
     print(f"DEBUG: TESSERACT_AVAILABLE: {TESSERACT_AVAILABLE}")
     
-    # First try to get tesseract path from environment variable
-    tesseract_path = os.getenv('TESSERACT_PATH')
-    print(f"DEBUG: TESSERACT_PATH env var: {tesseract_path}")
-    
-    if not tesseract_path:
-        # Try to find tesseract automatically
+    # On Linux, prioritize auto-detection over environment variables
+    # (in case env var contains Windows paths)
+    tesseract_path = None
+    if platform.system() in ['Linux', 'Darwin']:
+        # Try auto-detection first on Unix-like systems
         tesseract_path = shutil.which('tesseract')
         print(f"DEBUG: shutil.which('tesseract'): {tesseract_path}")
+        
+        if not tesseract_path:
+            # Try common Linux/macOS installation paths
+            common_paths = [
+                '/usr/bin/tesseract',
+                '/usr/local/bin/tesseract',
+                '/opt/homebrew/bin/tesseract'  # Homebrew on Apple Silicon
+            ]
+            for path in common_paths:
+                print(f"DEBUG: Checking Linux path: {path} - exists: {os.path.isfile(path)}")
+                if os.path.isfile(path):
+                    tesseract_path = path
+                    print(f"DEBUG: Found tesseract at Linux path: {path}")
+                    break
+    
+    # If not found on Linux, or if on Windows, try environment variable
+    if not tesseract_path:
+        tesseract_path = os.getenv('TESSERACT_PATH')
+        print(f"DEBUG: TESSERACT_PATH env var: {tesseract_path}")
+        
+        # Validate that the env var path actually exists
+        if tesseract_path and not os.path.isfile(tesseract_path):
+            print(f"DEBUG: Environment variable path doesn't exist: {tesseract_path}")
+            tesseract_path = None
     
     if not tesseract_path and platform.system() == 'Windows':
         # Try common Windows installation paths
@@ -141,19 +164,6 @@ if TESSERACT_AVAILABLE:
             if os.path.isfile(path):
                 tesseract_path = path
                 print(f"DEBUG: Found tesseract at Windows path: {path}")
-                break
-    elif not tesseract_path and platform.system() in ['Linux', 'Darwin']:
-        # Try common Linux/macOS installation paths
-        common_paths = [
-            '/usr/bin/tesseract',
-            '/usr/local/bin/tesseract',
-            '/opt/homebrew/bin/tesseract'  # Homebrew on Apple Silicon
-        ]
-        for path in common_paths:
-            print(f"DEBUG: Checking Linux path: {path} - exists: {os.path.isfile(path)}")
-            if os.path.isfile(path):
-                tesseract_path = path
-                print(f"DEBUG: Found tesseract at Linux path: {path}")
                 break
     
     if tesseract_path:
