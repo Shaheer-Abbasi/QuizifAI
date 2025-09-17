@@ -119,52 +119,41 @@ if TESSERACT_AVAILABLE:
     
     print(f"DEBUG: Platform detected: {platform.system()}")
     print(f"DEBUG: TESSERACT_AVAILABLE: {TESSERACT_AVAILABLE}")
+    print(f"DEBUG: Current PATH: {os.environ.get('PATH', 'Not set')}")
     
-    # On Linux, prioritize auto-detection over environment variables
-    # (in case env var contains Windows paths)
-    tesseract_path = None
-    if platform.system() in ['Linux', 'Darwin']:
-        # Try auto-detection first on Unix-like systems
+    # First try to get tesseract path from environment variable
+    tesseract_path = os.getenv('TESSERACT_PATH')
+    print(f"DEBUG: TESSERACT_PATH env var: {tesseract_path}")
+    
+    if not tesseract_path:
+        # Try to find tesseract automatically
         tesseract_path = shutil.which('tesseract')
         print(f"DEBUG: shutil.which('tesseract'): {tesseract_path}")
         
         if not tesseract_path:
-            # Try common Linux/macOS installation paths
+            # Try all common installation paths (Linux, macOS, Windows)
             common_paths = [
-                '/usr/bin/tesseract',
-                '/usr/local/bin/tesseract',
-                '/opt/homebrew/bin/tesseract'  # Homebrew on Apple Silicon
+                '/usr/bin/tesseract',           # Most Linux distributions
+                '/usr/local/bin/tesseract',     # Manual installs on Linux/macOS
+                '/opt/homebrew/bin/tesseract',  # Homebrew on Apple Silicon
+                '/bin/tesseract',               # Some minimal containers
+                '/usr/local/bin/tesseract',     # Some Docker containers
+                r'C:\Program Files\Tesseract-OCR\tesseract.exe',  # Windows default
+                r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe',  # Windows x86
+                r'C:\tools\tesseract\tesseract.exe'  # Chocolatey on Windows
             ]
+            
             for path in common_paths:
-                print(f"DEBUG: Checking Linux path: {path} - exists: {os.path.isfile(path)}")
+                print(f"DEBUG: Checking path: {path} - exists: {os.path.isfile(path)}")
                 if os.path.isfile(path):
                     tesseract_path = path
-                    print(f"DEBUG: Found tesseract at Linux path: {path}")
+                    print(f"DEBUG: Found tesseract at: {path}")
                     break
     
-    # If not found on Linux, or if on Windows, try environment variable
-    if not tesseract_path:
-        tesseract_path = os.getenv('TESSERACT_PATH')
-        print(f"DEBUG: TESSERACT_PATH env var: {tesseract_path}")
-        
-        # Validate that the env var path actually exists
-        if tesseract_path and not os.path.isfile(tesseract_path):
-            print(f"DEBUG: Environment variable path doesn't exist: {tesseract_path}")
-            tesseract_path = None
-    
-    if not tesseract_path and platform.system() == 'Windows':
-        # Try common Windows installation paths
-        common_paths = [
-            r'C:\Program Files\Tesseract-OCR\tesseract.exe',
-            r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe',
-            r'C:\Users\{}\AppData\Local\Tesseract-OCR\tesseract.exe'.format(os.getenv('USERNAME', '')),
-            r'C:\tools\tesseract\tesseract.exe'  # Chocolatey path
-        ]
-        for path in common_paths:
-            if os.path.isfile(path):
-                tesseract_path = path
-                print(f"DEBUG: Found tesseract at Windows path: {path}")
-                break
+    # Validate the path if we found one
+    if tesseract_path and not os.path.isfile(tesseract_path):
+        print(f"DEBUG: Path exists but not accessible: {tesseract_path}")
+        tesseract_path = None
     
     if tesseract_path:
         pytesseract.pytesseract.tesseract_cmd = tesseract_path
