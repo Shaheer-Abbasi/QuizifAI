@@ -1,5 +1,9 @@
 # Use the official Python runtime as the base image
+# Force cache refresh: 2025-09-17
 FROM python:3.9-slim-buster
+
+# Cache buster to force rebuild of subsequent layers
+RUN echo "Build timestamp: $(date)" > /build_info.txt
 
 # Install system dependencies including tesseract
 RUN apt-get update && \
