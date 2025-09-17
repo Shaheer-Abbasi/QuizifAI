@@ -1,39 +1,20 @@
 # Use the official Python runtime as the base image
-FROM python:3.11-slim
+FROM python:3.9-slim-buster
+
+# Install system dependencies including tesseract
+RUN apt-get update && \
+    apt-get -qq -y install tesseract-ocr && \
+    apt-get -qq -y install libtesseract-dev
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies including tesseract
-RUN apt update && apt install -y tesseract-ocr tesseract-ocr-eng
-
-# Verify tesseract installation and create symbolic link if needed
-RUN which tesseract || ln -s /usr/bin/tesseract /usr/local/bin/tesseract
-RUN tesseract --version
-RUN ls -la /usr/bin/tesseract*
-
-# Set environment variable for tesseract
-ENV TESSERACT_CMD="/usr/bin/tesseract"
-
 # Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt --verbose
-RUN pip install --no-cache-dir pytesseract==0.3.10 --verbose
-RUN pip list | grep -E "(pytesseract|Pillow|google-generativeai)"
+COPY requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
 
 # Copy the application code
 COPY . .
 
-# Create uploads directory
-RUN mkdir -p static/files
-
-# Test Python imports to ensure everything is working
-RUN python -c "import pytesseract; print('✅ pytesseract imported successfully')"
-RUN python -c "from PIL import Image; print('✅ Pillow imported successfully')"  
-RUN python -c "import google.generativeai; print('✅ google-generativeai imported successfully')"
-
-# Expose the port that the app runs on
-EXPOSE 5000
-
 # Command to run the application
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-5000} app:app"]
+CMD ["gunicorn", "app:app"]
