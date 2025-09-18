@@ -3,7 +3,7 @@
 A modern, AI-powered quiz generation and management platform built with Flask and Google's Gemini AI. Transform your study materials into interactive quizzes with beautiful analytics and progress tracking.
 
 ## Access
-[Here](https://quizifai.onrender.com)
+[Here](https://quizifai-1.onrender.com/)
 
 ## Features
 
@@ -129,3 +129,4 @@ The app automatically creates the SQLite database on first run. For production, 
 - **PostgreSQL**: Production database (recommended)
 
 *Transform your study materials into engaging quizzes and track your learning progress with AI-powered intelligence.*
+
