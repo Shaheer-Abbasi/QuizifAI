@@ -477,7 +477,7 @@ def generate_questions():
             return jsonify({"status": "error", "message": "No input provided"}), 400
 
         print("DEBUG: Calling Gemini AI")
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash-lite")
         response = model.generate_content("""Create quiz questions from the study material below. Follow these EXACT formatting rules:
 
                 RULES:
