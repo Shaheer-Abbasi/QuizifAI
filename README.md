@@ -64,7 +64,6 @@ A modern, AI-powered quiz generation and management platform built with Flask an
 ### Database
 - **SQLite**: Development database
 
-*Transform your study materials into engaging quizzes and track your learning progress with AI-powered intelligence.*
 
 
 
