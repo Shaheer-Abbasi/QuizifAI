@@ -2,6 +2,9 @@
 
 A modern, AI-powered quiz generation and management platform built with Flask and Google's Gemini AI. Transform your study materials into interactive quizzes with beautiful analytics and progress tracking.
 
+![Home-Page](qai-home.PNG)
+![Quiz-Page](qai-quiz.PNG)
+
 ## Access
 [Here](https://quizifai-1.onrender.com/)
 
@@ -63,5 +66,6 @@ A modern, AI-powered quiz generation and management platform built with Flask an
 - **SQLite**: Development database
 
 *Transform your study materials into engaging quizzes and track your learning progress with AI-powered intelligence.*
+
 
 
