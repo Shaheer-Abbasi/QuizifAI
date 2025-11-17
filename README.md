@@ -5,7 +5,7 @@ A modern, AI-powered quiz generation and management platform built with Flask an
 ![Home-Page](qai-home.PNG)
 
 ## Access
-[Here](https://quizifai-1.onrender.com/)
+[Here] (Server Down Currently)
 
 ## Features
 
@@ -63,6 +63,7 @@ A modern, AI-powered quiz generation and management platform built with Flask an
 
 ### Database
 - **SQLite**: Development database
+
 
 
 
